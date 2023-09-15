@@ -1,9 +1,9 @@
-package paciente
+package patient
 
-import "time"
+import "github.com/Nachofra/final-esp-backend-3/pkg/time"
 
-// describes a paciente.
-type Paciente struct {
+// Patient describes a patient.
+type Patient struct {
 	ID            int       `json:"id"`
 	FirstName     string    `json:"first_name"`
 	LastName      string    `json:"last_name"`
@@ -12,8 +12,8 @@ type Paciente struct {
 	DischargeDate time.Time `json:"discharge_date"`
 }
 
-// RequestPaciente describes the data needed to create a new paciente.
-type RequestPaciente struct {
+// NewPatient describes the data needed to create a new Patient.
+type NewPatient struct {
 	FirstName     string    `json:"first_name"`
 	LastName      string    `json:"last_name"`
 	Address       string    `json:"address"`

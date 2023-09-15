@@ -1,1 +1,1 @@
-package odontologo
+package dentist

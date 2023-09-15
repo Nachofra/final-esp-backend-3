@@ -1,4 +1,4 @@
-package odontologo
+package dentist
 
 var (
 	QueryInsertOdontologo = `INSERT INTO my_db.odontologo(first_name,last_name,registration_number)

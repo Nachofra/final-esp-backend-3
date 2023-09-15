@@ -1,4 +1,4 @@
-package paciente
+package patient
 
 var (
 	QueryInsertPaciente = `INSERT INTO my_db.paciente(first_name,last_name,address,dni,discharge_date)
