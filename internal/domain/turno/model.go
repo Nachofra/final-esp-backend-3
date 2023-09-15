@@ -17,7 +17,7 @@ type Turno struct {
 }
 
 // RequestTurno describes the data needed to create a new turno.
-type RequestTurno struct {
+type RequestPaciente struct {
 	Paciente     paciente.Paciente     `json:"paciente_id"`
 	Odontologo   odontologo.Odontologo `json:"odontologo_id"`
 	Date         time.Time             `json:"date"`
