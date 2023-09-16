@@ -29,8 +29,8 @@ type Store struct {
 	db *sql.DB
 }
 
-// NewStore creates a new repository.
-func NewStore(db *sql.DB) *Store {
+// New creates a new repository.
+func New(db *sql.DB) *Store {
 	return &Store{
 		db: db,
 	}
