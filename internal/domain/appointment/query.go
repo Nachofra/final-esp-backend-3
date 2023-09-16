@@ -1,4 +1,4 @@
-package turno
+package appointment
 
 var (
 	QueryInsertTurno = `INSERT INTO my_db.turno(paciente_id,odontologo_id,date,description)
