@@ -2,13 +2,13 @@ package dentist
 
 import (
 	"context"
-	"github.com/pkg/errors"
+	"errors"
 )
 
 var (
-	ErrNotFound  = errors.New("odontologo not found")
+	ErrNotFound  = errors.New("dentist not found")
 	ErrStatement = errors.New("error preparing statement")
-	ErrExec      = errors.New("error exect statement")
+	ErrExec      = errors.New("error executing statement")
 	ErrLastId    = errors.New("error getting last id")
 )
 
