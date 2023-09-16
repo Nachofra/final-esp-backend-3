@@ -38,8 +38,10 @@ func New(db *sql.DB) *Store {
 }
 
 // GetAll returns all appointments.
-func (s *Store) GetAll(_ context.Context) []appointment.Appointment {
-	rows, err := s.db.Query(QueryGetAllAppointment)
+func (s *Store) GetAll(_ context.Context, filters map[string]string) []appointment.Appointment {
+	query := GenerateQuery(filters)
+
+	rows, err := s.db.Query(query)
 	if err != nil {
 		return []appointment.Appointment{}
 	}
