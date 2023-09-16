@@ -1,15 +1,15 @@
 package dentist
 
 var (
-	QueryInsertOdontologo = `INSERT INTO my_db.odontologo(first_name,last_name,registration_number)
+	QueryInsertDentist = `INSERT INTO clinic.dentist(first_name,last_name,registration_number)
 	VALUES(?,?,?)`
-	QueryGetAllOdontologo = `SELECT id, first_name, last_name, registration_number
-	FROM my_db.odontologo`
-	QueryDeleteOdontologo  = `DELETE FROM my_db.odontologo WHERE id = ?`
-	QueryGetOdontologoById = `SELECT id, first_name, last_name, registration_number
-	FROM my_db.odontologo WHERE id = ?`
-	QueryGetOdontologoByRegistrationNumber = `SELECT id, first_name, last_name, registration_number
-	FROM my_db.odontologo WHERE registration_number = ?`
-	QueryUpdateOdontologo = `UPDATE my_db.odontologo SET first_name = ?, last_name = ?, registration_number = ?
+	QueryGetAllDentist = `SELECT id, first_name, last_name, registration_number
+	FROM clinic.dentist`
+	QueryDeleteDentist  = `DELETE FROM clinic.dentist WHERE id = ?`
+	QueryGetDentistByID = `SELECT id, first_name, last_name, registration_number
+	FROM clinic.dentist WHERE id = ?`
+	QueryGetDentistByRegistrationNumber = `SELECT id, first_name, last_name, registration_number
+	FROM clinic.dentist WHERE registration_number = ?`
+	QueryUpdateDentist = `UPDATE clinic.dentist SET first_name = ?, last_name = ?, registration_number = ?
 	WHERE id = ?`
 )
