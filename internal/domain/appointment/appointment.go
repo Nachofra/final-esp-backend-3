@@ -14,8 +14,8 @@ var (
 
 type Store interface {
 	Create(ctx context.Context, appointment Appointment) (Appointment, error)
-	GetAll(ctx context.Context) ([]Appointment, error)
-	GetByID(ctx context.Context, id int) (Appointment, error)
+	GetAll(ctx context.Context) []Appointment
+	GetByID(ctx context.Context, ID int) (Appointment, error)
 	Update(ctx context.Context, appointment Appointment) (Appointment, error)
-	Delete(ctx context.Context, id int) error
+	Delete(ctx context.Context, ID int) error
 }
