@@ -7,25 +7,6 @@ import (
 	"github.com/Nachofra/final-esp-backend-3/internal/domain/appointment"
 )
 
-const (
-	QueryGetAllAppointment = `SELECT id, patient_id, dentist_id, date, description
-	FROM clinic.appointment`
-
-	QueryGetAppointmentByID = `SELECT id, patient_id, dentist_id, date, description
-	FROM clinic.appointment WHERE id = ?`
-
-	QueryGetAppointmentByPatientID = `SELECT id, patient_id, dentist_id, date, description
-	FROM clinic.appointment WHERE patient_id = ?`
-
-	QueryInsertAppointment = `INSERT INTO clinic.appointment(patient_id,dentist_id,date,description)
-	VALUES(?,?,?,?)`
-
-	QueryUpdateAppointment = `UPDATE clinic.appointment SET patient_id = ?, dentist_id = ?, date = ?, description = ?
-	WHERE id = ?`
-
-	QueryDeleteAppointment = `DELETE FROM clinic.appointment WHERE id = ?`
-)
-
 type Store struct {
 	db *sql.DB
 }
