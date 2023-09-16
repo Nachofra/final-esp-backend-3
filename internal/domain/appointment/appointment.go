@@ -2,14 +2,6 @@ package appointment
 
 import (
 	"context"
-	"errors"
-)
-
-var (
-	ErrNotFound  = errors.New("appointment not found")
-	ErrStatement = errors.New("error preparing statement")
-	ErrExec      = errors.New("error executing statement")
-	ErrLastId    = errors.New("error getting last id")
 )
 
 type Store interface {
