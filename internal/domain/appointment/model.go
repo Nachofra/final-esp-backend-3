@@ -8,17 +8,17 @@ import (
 
 // Appointment describes a appointment.
 type Appointment struct {
-	ID           int             `json:"id"`
-	Patient      patient.Patient `json:"patient_id"`
-	Dentist      dentist.Dentist `json:"dentist_id"`
-	Date         time.Time       `json:"date"`
-	Descrtiption string          `json:"description"`
+	ID          int             `json:"id"`
+	Patient     patient.Patient `json:"patient_id"`
+	Dentist     dentist.Dentist `json:"dentist_id"`
+	Date        time.Time       `json:"date"`
+	Description string          `json:"description"`
 }
 
 // NewAppointment describes the data needed to create a new Appointment.
 type NewAppointment struct {
-	Patient      patient.Patient `json:"patient_id"`
-	Dentist      dentist.Dentist `json:"dentist_id"`
-	Date         time.Time       `json:"date"`
-	Descrtiption string          `json:"description"`
+	Patient     patient.Patient `json:"patient_id"`
+	Dentist     dentist.Dentist `json:"dentist_id"`
+	Date        time.Time       `json:"date"`
+	Description string          `json:"description"`
 }

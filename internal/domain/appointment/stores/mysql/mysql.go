@@ -1,6 +1,6 @@
-package appointment
+package mysql
 
-var (
+const (
 	QueryInsertAppointment = `INSERT INTO clinic.appointment(patient_id,dentist_id,date,description)
 	VALUES(?,?,?,?)`
 	QueryGetAllAppointment = `SELECT id, patient_id, dentist_id, date, description
