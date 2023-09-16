@@ -11,6 +11,7 @@ var (
 	ErrNotFound = errors.New("appointment not found")
 )
 
+// Store wraps all the operations to the database.
 type Store struct {
 	db *sql.DB
 }

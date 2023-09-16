@@ -4,6 +4,7 @@ import (
 	"context"
 )
 
+// Store specifies the contract needed for the Store in the Service.
 type Store interface {
 	GetAll(ctx context.Context, filters map[string]string) []Appointment
 	GetByID(ctx context.Context, ID int) (Appointment, error)
@@ -12,11 +13,13 @@ type Store interface {
 	Delete(ctx context.Context, ID int) error
 }
 
+// Service unifies all the business operation for the domain.
 type Service struct {
 	store Store
 }
 
-func NewStore(store Store) *Service {
+// NewService creates a new service.
+func NewService(store Store) *Service {
 	return &Service{
 		store: store,
 	}
