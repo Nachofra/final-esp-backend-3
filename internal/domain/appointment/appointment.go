@@ -2,6 +2,14 @@ package appointment
 
 import (
 	"context"
+	"errors"
+)
+
+var (
+	ErrNotFound      = errors.New("appointment not found")
+	ErrConflict      = errors.New("constraint conflict while storing")
+	ErrAlreadyExists = errors.New("appointment already exists")
+	ErrValueExceeded = errors.New("attribute value exceed type limit")
 )
 
 // Store specifies the contract needed for the Store in the Service.

@@ -5,10 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/Nachofra/final-esp-backend-3/internal/domain/appointment"
-)
-
-var (
-	ErrNotFound = errors.New("appointment not found")
+	"github.com/Nachofra/final-esp-backend-3/pkg/mysql"
 )
 
 // Store wraps all the operations to the database.
@@ -69,13 +66,13 @@ func (s *Store) GetByID(_ context.Context, ID int) (appointment.Appointment, err
 
 	err = row.Scan(&a.ID, &a.PatientID, &a.DentistID, &a.Date, &a.Description)
 	if err != nil {
+		err := mysql.CheckError(err)
 		switch {
-		case errors.Is(err, sql.ErrNoRows):
-			// TODO: implement log
-			err = ErrNotFound
+		case errors.Is(err, mysql.ErrDBNoRows):
+			return appointment.Appointment{}, appointment.ErrNotFound
+		default:
+			return appointment.Appointment{}, err
 		}
-
-		return appointment.Appointment{}, err
 	}
 
 	return a, nil
@@ -97,7 +94,17 @@ func (s *Store) Create(_ context.Context, a appointment.Appointment) (appointmen
 
 	result, err := statement.Exec(a.PatientID, a.DentistID, a.Date, a.Description)
 	if err != nil {
-		return appointment.Appointment{}, err
+		err := mysql.CheckError(err)
+		switch {
+		case errors.Is(err, mysql.ErrDBDuplicateEntry):
+			return appointment.Appointment{}, appointment.ErrAlreadyExists
+		case errors.Is(err, mysql.ErrDBConflict):
+			return appointment.Appointment{}, appointment.ErrConflict
+		case errors.Is(err, mysql.ErrDBValueExceeded):
+			return appointment.Appointment{}, appointment.ErrValueExceeded
+		default:
+			return appointment.Appointment{}, err
+		}
 	}
 
 	lastId, err := result.LastInsertId()
@@ -126,7 +133,15 @@ func (s *Store) Update(_ context.Context, a appointment.Appointment) (appointmen
 
 	result, err := statement.Exec(a.PatientID, a.DentistID, a.Date, a.Description, a.ID)
 	if err != nil {
-		return appointment.Appointment{}, err
+		err := mysql.CheckError(err)
+		switch {
+		case errors.Is(err, mysql.ErrDBConflict):
+			return appointment.Appointment{}, appointment.ErrConflict
+		case errors.Is(err, mysql.ErrDBValueExceeded):
+			return appointment.Appointment{}, appointment.ErrValueExceeded
+		default:
+			return appointment.Appointment{}, err
+		}
 	}
 
 	rowsAffected, err := result.RowsAffected()
@@ -135,7 +150,7 @@ func (s *Store) Update(_ context.Context, a appointment.Appointment) (appointmen
 	}
 
 	if rowsAffected < 1 {
-		return appointment.Appointment{}, ErrNotFound
+		return appointment.Appointment{}, appointment.ErrNotFound
 	}
 
 	return a, nil
@@ -145,7 +160,13 @@ func (s *Store) Update(_ context.Context, a appointment.Appointment) (appointmen
 func (s *Store) Delete(_ context.Context, ID int) error {
 	result, err := s.db.Exec(QueryDeleteAppointment, ID)
 	if err != nil {
-		return err
+		err := mysql.CheckError(err)
+		switch {
+		case errors.Is(err, mysql.ErrDBConflict):
+			return appointment.ErrConflict
+		default:
+			return err
+		}
 	}
 
 	rowsAffected, err := result.RowsAffected()
@@ -154,7 +175,7 @@ func (s *Store) Delete(_ context.Context, ID int) error {
 	}
 
 	if rowsAffected < 1 {
-		return ErrNotFound
+		return appointment.ErrNotFound
 	}
 
 	return nil
