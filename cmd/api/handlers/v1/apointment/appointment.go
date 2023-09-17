@@ -79,9 +79,10 @@ func (h *Handler) Create() gin.HandlerFunc {
 // @Produce json
 // @Success 200 {object} web.response
 // @Failure 500 {object} web.errorResponse
-// @Router /appointment [get]
+// @Router /appointment/:dni [get]
 func (h *Handler) GetAll() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		ctx.Param("dni")
 
 		// TODO agregar filtro para buscar por dni de paciente
 		appointments := h.service.GetAll(ctx, appointment.FilterAppointment{})
@@ -225,11 +226,12 @@ func (h *Handler) Delete() gin.HandlerFunc {
 // @Success 200 {object} web.response
 // @Failure 400 {object} web.errorResponse
 // @Failure 500 {object} web.errorResponse
-// @Router /appointment/DNI [post]
+// @Router /appointment/:dni [post]
 func (h *Handler) CreateByDNI() gin.HandlerFunc {
 	// TODO crear metodo para crear turno con dni de paciente
 	return func(ctx *gin.Context) {
 
+		ctx.Param("dni")
 		var request appointment.NewAppointment
 
 		err := ctx.ShouldBindJSON(&request)
