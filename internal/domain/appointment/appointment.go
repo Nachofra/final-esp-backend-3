@@ -16,7 +16,7 @@ var (
 type Store interface {
 	GetAll(ctx context.Context, filters map[string]string) []Appointment
 	GetByID(ctx context.Context, ID int) (Appointment, error)
-	Create(ctx context.Context, appointment Appointment) (Appointment, error)
+	Create(ctx context.Context, appointment NewAppointment) (Appointment, error)
 	Update(ctx context.Context, appointment Appointment) (Appointment, error)
 	Delete(ctx context.Context, ID int) error
 }
@@ -50,7 +50,7 @@ func (s *Service) GetByID(ctx context.Context, ID int) (Appointment, error) {
 }
 
 // Create creates a new appointment.
-func (s *Service) Create(ctx context.Context, appointment Appointment) (Appointment, error) {
+func (s *Service) Create(ctx context.Context, appointment NewAppointment) (Appointment, error) {
 	a, err := s.store.Create(ctx, appointment)
 	if err != nil {
 		return Appointment{}, err
