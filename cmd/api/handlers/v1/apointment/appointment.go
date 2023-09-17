@@ -10,7 +10,9 @@ import (
 )
 
 var (
-	ErrInternalServer = errors.New("internal server error")
+	ErrInvalidID           = errors.New("invalid ID")
+	ErrInternalServer      = errors.New("internal server error")
+	ErrUnprocessableEntity = errors.New("unprocessable entity: the JSON provided does not conform to the expected entity structure, please review it and try again")
 )
 
 type Handler struct {
@@ -39,21 +41,31 @@ func (h *Handler) Create() gin.HandlerFunc {
 
 		var request appointment.NewAppointment
 
-		err := ctx.Bind(&request)
+		err := ctx.ShouldBindJSON(&request)
 		if err != nil {
-			web.Error(ctx, http.StatusBadRequest, "%s", "bad request")
+			web.Error(ctx, http.StatusUnprocessableEntity, "%s", ErrUnprocessableEntity.Error())
 			return
 		}
 
 		app, err := h.service.Create(ctx, request)
 		if err != nil {
-			web.Error(ctx, http.StatusInternalServerError, "%s", ErrInternalServer)
-			return
+			switch {
+			case errors.Is(err, appointment.ErrAlreadyExists):
+				web.Error(ctx, http.StatusConflict, "%s", err.Error())
+				return
+			case errors.Is(err, appointment.ErrConflict):
+				web.Error(ctx, http.StatusConflict, "%s", err.Error())
+				return
+			case errors.Is(err, appointment.ErrValueExceeded):
+				web.Error(ctx, http.StatusUnprocessableEntity, "%s", err.Error())
+				return
+			default:
+				web.Error(ctx, http.StatusInternalServerError, "%s", ErrInternalServer.Error())
+				return
+			}
 		}
 
-		web.Success(ctx, http.StatusOK, gin.H{
-			"data": app,
-		})
+		web.Success(ctx, http.StatusCreated, app)
 
 	}
 }
@@ -72,11 +84,9 @@ func (h *Handler) GetAll() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 
 		// TODO agregar filtro para buscar por dni de paciente
-		appointment := h.service.GetAll(ctx, appointment.FilterAppointment{})
+		appointments := h.service.GetAll(ctx, appointment.FilterAppointment{})
 
-		web.Success(ctx, http.StatusOK, gin.H{
-			"data": appointment,
-		})
+		web.Success(ctx, http.StatusOK, appointments)
 	}
 }
 
@@ -96,19 +106,23 @@ func (h *Handler) GetByID() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id, err := strconv.Atoi(ctx.Param("id"))
 		if err != nil {
-			web.Error(ctx, http.StatusBadRequest, "%s", "id invalido")
+			web.Error(ctx, http.StatusBadRequest, "%s", ErrInvalidID.Error())
 			return
 		}
 
 		app, err := h.service.GetByID(ctx, id)
 		if err != nil {
-			web.Error(ctx, http.StatusInternalServerError, "%s", ErrInternalServer)
-			return
+			switch {
+			case errors.Is(err, appointment.ErrNotFound):
+				web.Error(ctx, http.StatusNotFound, "%s", err.Error())
+				return
+			default:
+				web.Error(ctx, http.StatusInternalServerError, "%s", ErrInternalServer.Error())
+				return
+			}
 		}
 
-		web.Success(ctx, http.StatusOK, gin.H{
-			"data": app,
-		})
+		web.Success(ctx, http.StatusOK, app)
 	}
 }
 
@@ -129,9 +143,9 @@ func (h *Handler) Update() gin.HandlerFunc {
 		var request appointment.Appointment
 		var ua appointment.UpdateAppointment
 
-		errBind := ctx.ShouldBind(&ua)
+		errBind := ctx.ShouldBindJSON(&ua)
 		if errBind != nil {
-			web.Error(ctx, http.StatusBadRequest, "%s", "bad request binding")
+			web.Error(ctx, http.StatusUnprocessableEntity, "%s", ErrUnprocessableEntity.Error())
 			return
 		}
 
@@ -139,7 +153,7 @@ func (h *Handler) Update() gin.HandlerFunc {
 
 		idInt, err := strconv.Atoi(id)
 		if err != nil {
-			web.Error(ctx, http.StatusBadRequest, "%s", "bad request param")
+			web.Error(ctx, http.StatusBadRequest, "%s", ErrInvalidID.Error())
 			return
 		}
 
@@ -147,13 +161,20 @@ func (h *Handler) Update() gin.HandlerFunc {
 
 		app, err := h.service.Update(ctx, request, ua)
 		if err != nil {
-			web.Error(ctx, http.StatusInternalServerError, "%s", ErrInternalServer)
-			return
+			switch {
+			case errors.Is(err, appointment.ErrConflict):
+				web.Error(ctx, http.StatusConflict, "%s", err.Error())
+				return
+			case errors.Is(err, appointment.ErrValueExceeded):
+				web.Error(ctx, http.StatusUnprocessableEntity, "%s", err.Error())
+				return
+			default:
+				web.Error(ctx, http.StatusInternalServerError, "%s", ErrInternalServer.Error())
+				return
+			}
 		}
 
-		web.Success(ctx, http.StatusOK, gin.H{
-			"data": app,
-		})
+		web.Success(ctx, http.StatusOK, app)
 
 	}
 }
@@ -174,19 +195,23 @@ func (h *Handler) Delete() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id, err := strconv.Atoi(ctx.Param("id"))
 		if err != nil {
-			web.Error(ctx, http.StatusBadRequest, "%s", "invalid id")
+			web.Error(ctx, http.StatusBadRequest, "%s", ErrInvalidID.Error())
 			return
 		}
 
 		err = h.service.Delete(ctx, id)
 		if err != nil {
-			web.Error(ctx, http.StatusInternalServerError, "%s", ErrInternalServer)
-			return
+			switch {
+			case errors.Is(err, appointment.ErrConflict):
+				web.Error(ctx, http.StatusConflict, "%s", err.Error())
+				return
+			default:
+				web.Error(ctx, http.StatusInternalServerError, "%s", ErrInternalServer.Error())
+				return
+			}
 		}
 
-		web.Success(ctx, http.StatusOK, gin.H{
-			"mensaje": "Appointment deleted",
-		})
+		web.Success(ctx, http.StatusNoContent, nil)
 	}
 }
 
@@ -207,21 +232,31 @@ func (h *Handler) CreateByDNI() gin.HandlerFunc {
 
 		var request appointment.NewAppointment
 
-		err := ctx.Bind(&request)
+		err := ctx.ShouldBindJSON(&request)
 		if err != nil {
-			web.Error(ctx, http.StatusBadRequest, "%s", "bad request")
+			web.Error(ctx, http.StatusUnprocessableEntity, "%s", ErrUnprocessableEntity.Error())
 			return
 		}
 
 		app, err := h.service.Create(ctx, request)
 		if err != nil {
-			web.Error(ctx, http.StatusInternalServerError, "%s", ErrInternalServer)
-			return
+			switch {
+			case errors.Is(err, appointment.ErrAlreadyExists):
+				web.Error(ctx, http.StatusConflict, "%s", err.Error())
+				return
+			case errors.Is(err, appointment.ErrConflict):
+				web.Error(ctx, http.StatusConflict, "%s", err.Error())
+				return
+			case errors.Is(err, appointment.ErrValueExceeded):
+				web.Error(ctx, http.StatusUnprocessableEntity, "%s", err.Error())
+				return
+			default:
+				web.Error(ctx, http.StatusInternalServerError, "%s", ErrInternalServer.Error())
+				return
+			}
 		}
 
-		web.Success(ctx, http.StatusOK, gin.H{
-			"data": app,
-		})
+		web.Success(ctx, http.StatusCreated, app)
 
 	}
 }
