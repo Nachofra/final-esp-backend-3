@@ -5,7 +5,7 @@ import (
 	"github.com/Nachofra/final-esp-backend-3/pkg/time"
 )
 
-// Appointment describes a appointment.
+// Appointment describes an Appointment between a dentist and its patient.
 type Appointment struct {
 	ID          int       `json:"id"`
 	PatientID   int       `json:"patient_id"`
@@ -22,7 +22,23 @@ type NewAppointment struct {
 	Description string    `json:"description"`
 }
 
-// FilterAppointment describes the data needed to filter an appointment.
+// UpdateAppointment describes the data needed to update an Appointment.
+type UpdateAppointment struct {
+	PatientID   int       `json:"patient_id"`
+	DentistID   int       `json:"dentist_id"`
+	Date        time.Time `json:"date"`
+	Description string    `json:"description"`
+}
+
+// PatchAppointment describes the data needed to patch an Appointment.
+type PatchAppointment struct {
+	PatientID   *int       `json:"patient_id"`
+	DentistID   *int       `json:"dentist_id"`
+	Date        *time.Time `json:"date"`
+	Description *string    `json:"description"`
+}
+
+// FilterAppointment describes the data needed to filter an Appointment.
 type FilterAppointment struct {
 	PatientID int       `form:"patient_id"`
 	DentistID int       `form:"dentist_id"`
