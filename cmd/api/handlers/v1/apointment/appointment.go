@@ -23,6 +23,7 @@ func NewHandler(service appointment.Service) *Handler {
 	}
 }
 
+// Create is the handler in charge of the appointment creation flow.
 // Appointment godoc
 // @Summary appointment example
 // @Description Create a new appointment
@@ -57,6 +58,7 @@ func (h *Handler) Create() gin.HandlerFunc {
 	}
 }
 
+// GetAll is the handler in charge of appointment querying flow.
 // Appointment godoc
 // @Summary appointment example
 // @Description Get all appointments
@@ -78,6 +80,7 @@ func (h *Handler) GetAll() gin.HandlerFunc {
 	}
 }
 
+// GetByID is the handler in charge of querying appointments by ID.
 // Appointment godoc
 // @Summary appointment example
 // @Description Get appointment by id
@@ -109,6 +112,7 @@ func (h *Handler) GetByID() gin.HandlerFunc {
 	}
 }
 
+// Update is the handler in charge of appointment updating flow.
 // Appointment godoc
 // @Summary appointment example
 // @Description Update appointment by id
@@ -154,6 +158,7 @@ func (h *Handler) Update() gin.HandlerFunc {
 	}
 }
 
+// Delete is the handler in charge of appointment deleting flow.
 // Appointment godoc
 // @Summary appointment example
 // @Description Delete appointment by id
@@ -185,6 +190,7 @@ func (h *Handler) Delete() gin.HandlerFunc {
 	}
 }
 
+// CreateByDNI is the handler in charge of creating appointments by DNI and RegistrationNumber.
 // Appointment by DNI godoc
 // @Summary appointment example
 // @Description Create a new appointment
