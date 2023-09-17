@@ -20,6 +20,8 @@ type Config struct {
 	DBUser     string `env:"DATABASE_USER"`
 	DBPassword string `env:"DATABASE_PASSWORD"`
 	DBSchema   string `env:"DATABASE_SCHEMA"`
+
+	GinMode string `env:"GIN_MODE" envDefault:"debug"`
 }
 
 // Get returns the config of the whole app.

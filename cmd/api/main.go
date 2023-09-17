@@ -29,7 +29,6 @@ func main() {
 
 	v := validator.New(validator.WithRequiredStructEnabled())
 
-	gin.SetMode(gin.ReleaseMode)
 	eng := gin.New()
 	eng.Use(middleware.Logger())
 	eng.Use(middleware.Authenticate())
