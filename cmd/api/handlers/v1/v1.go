@@ -6,8 +6,6 @@ import (
 	"log"
 )
 
-// Here we will set all routes of the application and some dependencies
-
 // Config has all the dependencies and requirements to initialize handlers.
 type Config struct {
 	Log log.Logger
