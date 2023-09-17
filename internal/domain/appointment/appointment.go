@@ -34,8 +34,10 @@ func NewService(store Store) *Service {
 }
 
 // GetAll returns appointments by filter.
-func (s *Service) GetAll(ctx context.Context, filters map[string]string) []Appointment {
-	appointments := s.store.GetAll(ctx, filters)
+func (s *Service) GetAll(ctx context.Context, filters FilterAppointment) []Appointment {
+	f := filters.ToMap()
+
+	appointments := s.store.GetAll(ctx, f)
 	return appointments
 }
 
