@@ -42,6 +42,7 @@ type PatchAppointment struct {
 type FilterAppointment struct {
 	PatientID int       `form:"patient_id"`
 	DentistID int       `form:"dentist_id"`
+	DNI       int       `json:"dni" validate:"len=8"` // TODO: add validation to DNI when doing dependencies initialization (we need to create a singleton validator for all the services that needs it)
 	FromDate  time.Time `form:"from_date"`
 	ToDate    time.Time `form:"to_date"`
 }
