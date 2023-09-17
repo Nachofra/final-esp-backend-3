@@ -3,13 +3,15 @@ package v1
 import (
 	"database/sql"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"log"
 )
 
 // Config has all the dependencies and requirements to initialize handlers.
 type Config struct {
-	Log log.Logger
-	DB  *sql.DB
+	Log       log.Logger
+	DB        *sql.DB
+	Validator *validator.Validate
 }
 
 // Routes sets all the version 1 routes.
