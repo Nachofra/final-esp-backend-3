@@ -56,8 +56,8 @@ func (s *service) Create(ctx context.Context, newDentist NewDentist) (Dentist, e
 
 // GetAll returns all products.
 func (s *service) GetAll(ctx context.Context) []Dentist {
-	productos := s.store.GetAll(ctx)
-	return productos
+	dentists := s.store.GetAll(ctx)
+	return dentists
 }
 
 // GetByID returns a product by its ID.
