@@ -28,6 +28,6 @@ func Logger() gin.HandlerFunc {
 			"PATH: %s%s\n"+
 			"METHOD: %s\n"+
 			"SIZE: %d",
-			basePath, path, method, localTime, size)
+			localTime, basePath, path, method, size)
 	}
 }
