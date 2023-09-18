@@ -15,7 +15,7 @@ var (
 
 type Store interface {
 	Create(ctx context.Context, dentist Dentist) (Dentist, error)
-	GetAll(ctx context.Context) []Dentist
+	GetAll(ctx context.Context) ([]Dentist, error)
 	GetByID(ctx context.Context, id int) (Dentist, error)
 	GetByRegistrationNumber(ctx context.Context, rn int) (Dentist, error)
 	Update(ctx context.Context, dentist Dentist) (Dentist, error)
