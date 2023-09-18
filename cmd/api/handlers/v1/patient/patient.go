@@ -2,7 +2,6 @@ package patient
 
 import (
 	"github.com/Nachofra/final-esp-backend-3/internal/domain/patient"
-	_ "github.com/Nachofra/final-esp-backend-3/internal/domain/patient"
 	"github.com/Nachofra/final-esp-backend-3/pkg/web"
 	"github.com/gin-gonic/gin"
 	"net/http"
