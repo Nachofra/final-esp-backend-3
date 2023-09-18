@@ -1,12 +1,19 @@
 package dentist
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/Nachofra/final-esp-backend-3/internal/domain/dentist"
 	"github.com/Nachofra/final-esp-backend-3/pkg/web"
 	"github.com/gin-gonic/gin"
+)
+
+var (
+	ErrInvalidID           = errors.New("invalid ID")
+	ErrInternalServer      = errors.New("internal server error")
+	ErrUnprocessableEntity = errors.New("unprocessable entity: the JSON provided does not conform to the expected entity structure, please review it and try again")
 )
 
 // Here we will implement dentist handlers
@@ -45,14 +52,14 @@ func (h *Handler) Create() gin.HandlerFunc {
 			return
 		}
 
-		product, err := h.service.Create(ctx, request)
+		dentist, err := h.service.Create(ctx, request)
 		if err != nil {
 			web.Error(ctx, http.StatusInternalServerError, "%s", "internal server error")
 			return
 		}
 
 		web.Success(ctx, http.StatusOK, gin.H{
-			"data": product,
+			"data": dentist,
 		})
 
 	}
@@ -121,7 +128,7 @@ func (h *Handler) GetByID() gin.HandlerFunc {
 func (h *Handler) Update() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 
-		var request dentist.NewDentist
+		var request dentist.UpdateDentist
 		errBind := ctx.Bind(&request)
 
 		if errBind != nil {
@@ -179,5 +186,41 @@ func (h *Handler) Delete() gin.HandlerFunc {
 		web.Success(ctx, http.StatusOK, gin.H{
 			"mensaje": "dentist deleted",
 		})
+	}
+}
+
+// Dentist godoc
+// @Summary dentist example
+// @Description Update dentist by id
+// @Tags dentist
+// @Accept json
+// @Produce json
+// @Success 200 {object} web.response
+// @Failure 400 {object} web.errorResponse
+// @Failure 500 {object} web.errorResponse
+// @Router /dentist [patch]
+func (h *Handler) Patch() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+
+		var request dentist.Dentist
+		var pd dentist.PatchDentist
+
+		errBind := ctx.Bind(&request)
+
+		if errBind != nil {
+			web.Error(ctx, http.StatusBadRequest, "%s", "bad request binding")
+			return
+		}
+
+		dentist, err := h.service.Patch(ctx, request, pd)
+		if err != nil {
+			web.Error(ctx, http.StatusInternalServerError, "%s", "internal server error")
+			return
+		}
+
+		web.Success(ctx, http.StatusOK, gin.H{
+			"data": dentist,
+		})
+
 	}
 }

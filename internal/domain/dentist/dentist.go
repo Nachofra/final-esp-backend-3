@@ -29,8 +29,9 @@ type Service interface {
 	Create(ctx context.Context, newDentist NewDentist) (Dentist, error)
 	GetAll(ctx context.Context) []Dentist
 	GetByID(ctx context.Context, id int) (Dentist, error)
-	Update(ctx context.Context, newDentist NewDentist, id int) (Dentist, error)
+	Update(ctx context.Context, updateDentist UpdateDentist, id int) (Dentist, error)
 	Delete(ctx context.Context, id int) error
+	Patch(ctx context.Context, dentist Dentist, pd PatchDentist) (Dentist, error)
 }
 
 // NewService creates a new product service.
@@ -43,7 +44,7 @@ func NewService(store Store) Service {
 
 // Create creates a new product.
 func (s *service) Create(ctx context.Context, newDentist NewDentist) (Dentist, error) {
-	dentist := requestToDentist(newDentist)
+	dentist := newToDentist(newDentist)
 	response, err := s.store.Create(ctx, dentist)
 	if err != nil {
 		log.Println("error en servicio. Metodo create")
@@ -71,8 +72,8 @@ func (s *service) GetByID(ctx context.Context, id int) (Dentist, error) {
 }
 
 // Update updates a product.
-func (s *service) Update(ctx context.Context, newDentist NewDentist, id int) (Dentist, error) {
-	dentist := requestToDentist(newDentist)
+func (s *service) Update(ctx context.Context, updateDentist UpdateDentist, id int) (Dentist, error) {
+	dentist := updateToDentist(updateDentist)
 	dentist.ID = id
 	response, err := s.store.Update(ctx, dentist)
 	if err != nil {
@@ -94,11 +95,42 @@ func (s *service) Delete(ctx context.Context, id int) error {
 	return nil
 }
 
-func requestToDentist(newDentist NewDentist) Dentist {
+// Patch patches an appointment.
+func (s *service) Patch(ctx context.Context, dentist Dentist, pd PatchDentist) (Dentist, error) {
+	if pd.FirstName != nil {
+		dentist.FirstName = *pd.FirstName
+	}
+
+	if pd.LastName != nil {
+		dentist.LastName = *pd.LastName
+	}
+
+	if pd.RegistrationNumber != nil {
+		dentist.RegistrationNumber = *pd.RegistrationNumber
+	}
+
+	a, err := s.store.Update(ctx, dentist)
+	if err != nil {
+		return Dentist{}, err
+	}
+
+	return a, nil
+}
+
+func newToDentist(newDentist NewDentist) Dentist {
 	var dentist Dentist
 	dentist.FirstName = newDentist.FirstName
 	dentist.LastName = newDentist.LastName
 	dentist.RegistrationNumber = newDentist.RegistrationNumber
+
+	return dentist
+}
+
+func updateToDentist(updateDentist UpdateDentist) Dentist {
+	var dentist Dentist
+	dentist.FirstName = updateDentist.FirstName
+	dentist.LastName = updateDentist.LastName
+	dentist.RegistrationNumber = updateDentist.RegistrationNumber
 
 	return dentist
 }

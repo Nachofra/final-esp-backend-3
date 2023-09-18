@@ -3,6 +3,7 @@ package mysql
 import (
 	"context"
 	"database/sql"
+
 	"github.com/Nachofra/final-esp-backend-3/internal/domain/dentist"
 )
 
@@ -46,6 +47,7 @@ func (s *Store) GetAll(_ context.Context) []dentist.Dentist {
 	defer func(rows *sql.Rows) {
 		err := rows.Close()
 		if err != nil {
+			//TODO que hago aca?
 			panic("IMPLEMENT LOGGER")
 		}
 	}(rows)
@@ -104,6 +106,7 @@ func (s *Store) Create(_ context.Context, d dentist.Dentist) (dentist.Dentist, e
 	defer func(statement *sql.Stmt) {
 		err := statement.Close()
 		if err != nil {
+			//TODO que hago aca?
 			panic("IMPLEMENT LOGGER")
 		}
 	}(statement)
@@ -137,6 +140,7 @@ func (s *Store) Update(_ context.Context, d dentist.Dentist) (dentist.Dentist, e
 	defer func(statement *sql.Stmt) {
 		err := statement.Close()
 		if err != nil {
+			//TODO que hago aca?
 			panic("IMPLEMENT LOGGER")
 		}
 	}(statement)
