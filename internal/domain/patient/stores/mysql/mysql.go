@@ -89,6 +89,26 @@ func (s *Store) GetByID(_ context.Context, id int) (patient.Patient, error) {
 	return p, nil
 }
 
+// GetByDNI returns a patient by its DNI.
+func (s *Store) GetByDNI(_ context.Context, dni int) (patient.Patient, error) {
+	row := s.db.QueryRow(QueryGetPatientByDNI, dni)
+
+	var p patient.Patient
+
+	err := row.Scan(
+		&p.ID,
+		&p.FirstName,
+		&p.LastName,
+		&p.Address,
+		&p.DNI,
+		&p.DischargeDate,
+	)
+	if err != nil {
+		return patient.Patient{}, err
+	}
+	return p, nil
+}
+
 // Create creates a new patient.
 func (s *Store) Create(_ context.Context, p patient.Patient) (patient.Patient, error) {
 	statement, err := s.db.Prepare(QueryInsertPatient)

@@ -18,6 +18,7 @@ type Store interface {
 	Create(ctx context.Context, patient Patient) (Patient, error)
 	GetAll(ctx context.Context) ([]Patient, error)
 	GetByID(ctx context.Context, id int) (Patient, error)
+	GetByDNI(ctx context.Context, dni int) (Patient, error)
 	Update(ctx context.Context, patient Patient) (Patient, error)
 	Delete(ctx context.Context, id int) error
 }
@@ -61,6 +62,17 @@ func (s *Service) GetByID(ctx context.Context, id int) (Patient, error) {
 	if err != nil {
 		log.Println("error getting patient on service layer", err.Error())
 		return Patient{}, errors.New("service error. Method GetByID")
+	}
+
+	return patient, nil
+}
+
+// GetByID returns a patient by its DNI.
+func (s *Service) GetByDNI(ctx context.Context, dni int) (Patient, error) {
+	patient, err := s.store.GetByDNI(ctx, dni)
+	if err != nil {
+		log.Println("error getting patient on service layer", err.Error())
+		return Patient{}, errors.New("service error. Method GetByDNI")
 	}
 
 	return patient, nil
