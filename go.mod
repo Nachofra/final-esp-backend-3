@@ -10,3 +10,5 @@ require (
 	github.com/swaggo/gin-swagger v1.6.0
 	github.com/swaggo/swag v1.16.2
 )
+
+require github.com/caarlos0/env/v9 v9.0.0 // indirect
