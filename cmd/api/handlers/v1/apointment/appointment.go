@@ -64,9 +64,7 @@ func (h *Handler) Create() gin.HandlerFunc {
 				return
 			}
 		}
-
 		web.Success(ctx, http.StatusCreated, app)
-
 	}
 }
 
@@ -79,13 +77,16 @@ func (h *Handler) Create() gin.HandlerFunc {
 // @Produce json
 // @Success 200 {object} web.response
 // @Failure 500 {object} web.errorResponse
-// @Router /appointment/:dni [get]
-func (h *Handler) GetAll() gin.HandlerFunc {
+// @Router /appointment [get]
+func (h *Handler) GetByDNI() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		ctx.Param("dni")
+		dni, err := strconv.Atoi(ctx.Query("dni"))
+		if err != nil {
+			web.Error(ctx, http.StatusBadRequest, "%s", ErrInvalidID.Error())
+			return
+		}
 
-		// TODO agregar filtro para buscar por dni de paciente
-		appointments := h.service.GetAll(ctx, appointment.FilterAppointment{})
+		appointments := h.service.GetAll(ctx, appointment.FilterAppointment{DNI: dni})
 
 		web.Success(ctx, http.StatusOK, appointments)
 	}
@@ -174,9 +175,58 @@ func (h *Handler) Update() gin.HandlerFunc {
 				return
 			}
 		}
-
 		web.Success(ctx, http.StatusOK, app)
+	}
+}
 
+// PatchUpdate is the handler in charge of appointment updating flow.
+// Appointment godoc
+// @Summary appointment example
+// @Description PatchUpdate appointment by id
+// @Tags appointment
+// @Accept json
+// @Produce json
+// @Success 200 {object} web.response
+// @Failure 400 {object} web.errorResponse
+// @Failure 500 {object} web.errorResponse
+// @Router /appointment/:id [put]
+func (h *Handler) PatchUpdate() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+
+		var request appointment.Appointment
+		var pa appointment.PatchAppointment
+
+		errBind := ctx.ShouldBindJSON(&pa)
+		if errBind != nil {
+			web.Error(ctx, http.StatusUnprocessableEntity, "%s", ErrUnprocessableEntity.Error())
+			return
+		}
+
+		id := ctx.Param("id")
+
+		idInt, err := strconv.Atoi(id)
+		if err != nil {
+			web.Error(ctx, http.StatusBadRequest, "%s", ErrInvalidID.Error())
+			return
+		}
+
+		request, _ = h.service.GetByID(ctx, idInt)
+
+		app, err := h.service.Patch(ctx, request, pa)
+		if err != nil {
+			switch {
+			case errors.Is(err, appointment.ErrConflict):
+				web.Error(ctx, http.StatusConflict, "%s", err.Error())
+				return
+			case errors.Is(err, appointment.ErrValueExceeded):
+				web.Error(ctx, http.StatusUnprocessableEntity, "%s", err.Error())
+				return
+			default:
+				web.Error(ctx, http.StatusInternalServerError, "%s", ErrInternalServer.Error())
+				return
+			}
+		}
+		web.Success(ctx, http.StatusOK, app)
 	}
 }
 
@@ -211,7 +261,6 @@ func (h *Handler) Delete() gin.HandlerFunc {
 				return
 			}
 		}
-
 		web.Success(ctx, http.StatusNoContent, nil)
 	}
 }
@@ -257,10 +306,6 @@ func (h *Handler) CreateByDNI() gin.HandlerFunc {
 				return
 			}
 		}
-
 		web.Success(ctx, http.StatusCreated, app)
-
 	}
 }
-
-// TODO crear metodo PATCH por algun campo de turno (por ej editar fecha)
