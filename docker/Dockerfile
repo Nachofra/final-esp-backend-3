@@ -1,28 +1,28 @@
-# Usar una imagen base de Go
+# Use a Go base image
 FROM golang:1.20
 
-# Establecer el directorio de trabajo dentro del contenedor
+# Set the working directory inside the container
 WORKDIR /go/src/github.com/Nachofra/final-esp-backend-3
 
-# Copiar el archivo go.mod y go.sum para descargar las dependencias
+# Copy the go.mod and go.sum files to download dependencies
 COPY go.mod go.sum ./
 
-# Descargar las dependencias
+# Download dependencies
 RUN go mod download
 
-# Copiar todo el código fuente desde la ubicación relativa "cmd/api/" al directorio de trabajo actual
+# Copy all the source code from the relative location "cmd/api/" to the current working directory
 COPY ./cmd/ ./cmd/
 COPY ./internal/ ./internal/
 COPY ./pkg/ ./pkg/
 
-# Ejecutar go mod tidy
+# Run go mod tidy
 RUN go mod tidy
 
-# Compilar la aplicación
+# Compile the application
 RUN go build -o main ./cmd/api/
 
-# Exponer el puerto en el que la aplicación escuchará
+# Expose the port on which the application will listen
 EXPOSE 8080
 
-# Comando para ejecutar la aplicación al iniciar el contenedor
+# Command to run the application when the container starts
 CMD ["./main"]

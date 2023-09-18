@@ -14,7 +14,7 @@ services:
       - network
 
   app:
-    image: final-esp-backend-3-grupo-1 # run "make build" to generate this image
+    image: final-esp-backend-3-grupo-1
     container_name: final-esp-backend-3-grupo-1-app
     env_file:
       - .env
