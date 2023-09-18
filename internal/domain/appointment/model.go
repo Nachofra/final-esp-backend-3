@@ -1,24 +1,62 @@
 package appointment
 
 import (
-	"github.com/Nachofra/final-esp-backend-3/internal/domain/dentist"
-	"github.com/Nachofra/final-esp-backend-3/internal/domain/patient"
+	"encoding/json"
 	"github.com/Nachofra/final-esp-backend-3/pkg/time"
 )
 
-// Appointment describes a appointment.
+// Appointment describes an Appointment between a dentist and its patient.
 type Appointment struct {
-	ID           int             `json:"id"`
-	Patient      patient.Patient `json:"patient_id"`
-	Dentist      dentist.Dentist `json:"dentist_id"`
-	Date         time.Time       `json:"date"`
-	Descrtiption string          `json:"description"`
+	ID          int       `json:"id"`
+	PatientID   int       `json:"patient_id"`
+	DentistID   int       `json:"dentist_id"`
+	Date        time.Time `json:"date"`
+	Description string    `json:"description"`
 }
 
 // NewAppointment describes the data needed to create a new Appointment.
 type NewAppointment struct {
-	Patient      patient.Patient `json:"patient_id"`
-	Dentist      dentist.Dentist `json:"dentist_id"`
-	Date         time.Time       `json:"date"`
-	Descrtiption string          `json:"description"`
+	PatientID   int       `json:"patient_id"`
+	DentistID   int       `json:"dentist_id"`
+	Date        time.Time `json:"date"`
+	Description string    `json:"description"`
+}
+
+// UpdateAppointment describes the data needed to update an Appointment.
+type UpdateAppointment struct {
+	PatientID   int       `json:"patient_id"`
+	DentistID   int       `json:"dentist_id"`
+	Date        time.Time `json:"date"`
+	Description string    `json:"description"`
+}
+
+// PatchAppointment describes the data needed to patch an Appointment.
+type PatchAppointment struct {
+	PatientID   *int       `json:"patient_id"`
+	DentistID   *int       `json:"dentist_id"`
+	Date        *time.Time `json:"date"`
+	Description *string    `json:"description"`
+}
+
+// FilterAppointment describes the data needed to filter an Appointment.
+type FilterAppointment struct {
+	PatientID int       `form:"patient_id"`
+	DentistID int       `form:"dentist_id"`
+	DNI       int       `json:"dni" validate:"len=8"` // TODO: add validation to DNI when doing dependencies initialization (we need to create a singleton validator for all the services that needs it)
+	FromDate  time.Time `form:"from_date"`
+	ToDate    time.Time `form:"to_date"`
+}
+
+// ToMap parses FilterAppointment to a map[string]string.
+func (fa FilterAppointment) ToMap() map[string]string {
+	var newMap map[string]string
+
+	b, _ := json.Marshal(fa)
+
+	err := json.Unmarshal(b, &newMap)
+	if err != nil {
+		return nil
+	}
+
+	return newMap
 }
