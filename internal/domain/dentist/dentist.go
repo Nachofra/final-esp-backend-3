@@ -17,6 +17,7 @@ type Store interface {
 	Create(ctx context.Context, dentist Dentist) (Dentist, error)
 	GetAll(ctx context.Context) []Dentist
 	GetByID(ctx context.Context, id int) (Dentist, error)
+	GetByRegistrationNumber(ctx context.Context, rn int) (Dentist, error)
 	Update(ctx context.Context, dentist Dentist) (Dentist, error)
 	Delete(ctx context.Context, id int) error
 }
@@ -29,6 +30,7 @@ type Service interface {
 	Create(ctx context.Context, newDentist NewDentist) (Dentist, error)
 	GetAll(ctx context.Context) ([]Dentist, error)
 	GetByID(ctx context.Context, id int) (Dentist, error)
+	GetByRegistrationNumber(ctx context.Context, rn int) (Dentist, error)
 	Update(ctx context.Context, updateDentist UpdateDentist, id int) (Dentist, error)
 	Delete(ctx context.Context, id int) error
 	Patch(ctx context.Context, dentist Dentist, pd PatchDentist) (Dentist, error)
@@ -61,6 +63,7 @@ func (s *service) GetAll(ctx context.Context) ([]Dentist, error) {
 		log.Println("error getting dentists on service layer", err.Error())
 		return []Dentist{}, errors.New("service error. Method GetAll")
 	}
+
 	return dentists, nil
 }
 
@@ -70,6 +73,17 @@ func (s *service) GetByID(ctx context.Context, id int) (Dentist, error) {
 	if err != nil {
 		log.Println("error getting dentist on service layer", err.Error())
 		return Dentist{}, errors.New("service error. Method GetByID")
+	}
+
+	return dentist, nil
+}
+
+// GetByRegistrationNumber returns a patient by its RegistrationNumber.
+func (s *service) GetByRegistrationNumber(ctx context.Context, dni int) (Dentist, error) {
+	dentist, err := s.store.GetByRegistrationNumber(ctx, dni)
+	if err != nil {
+		log.Println("error getting patient on service layer", err.Error())
+		return Dentist{}, errors.New("service error. Method GetByRegistrationNumber")
 	}
 
 	return dentist, nil

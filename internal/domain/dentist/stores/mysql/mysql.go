@@ -96,6 +96,25 @@ func (s *Store) GetByID(_ context.Context, id int) (dentist.Dentist, error) {
 	return d, nil
 }
 
+// GetByRegistrationNumber returns a dentist by its RegistrationNumber.
+func (s *Store) GetByRegistrationNumber(_ context.Context, rn int) (dentist.Dentist, error) {
+	row := s.db.QueryRow(QueryGetDentistByRegistrationNumber, rn)
+
+	var d dentist.Dentist
+
+	err := row.Scan(
+		&d.ID,
+		&d.FirstName,
+		&d.LastName,
+		&d.RegistrationNumber,
+	)
+	if err != nil {
+		return dentist.Dentist{}, err
+	}
+
+	return d, nil
+}
+
 // Create creates a new dentist.
 func (s *Store) Create(_ context.Context, d dentist.Dentist) (dentist.Dentist, error) {
 	statement, err := s.db.Prepare(QueryInsertDentist)

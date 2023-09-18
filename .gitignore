@@ -20,3 +20,5 @@ go.work
 #IDE metadata
 **.idea/**
 
+# Env files
+*.env
