@@ -22,12 +22,19 @@ type Store interface {
 	Delete(ctx context.Context, id int) error
 }
 
-type service struct {
+type Service struct {
 	store Store
 }
 
+// NewService creates a new service.
+func NewService(store Store) *Service {
+	return &Service{
+		store: store,
+	}
+}
+
 // Create creates a new patient.
-func (s *service) Create(ctx context.Context, newPatient NewPatient) (Patient, error) {
+func (s *Service) Create(ctx context.Context, newPatient NewPatient) (Patient, error) {
 	patient := requestToPatient(newPatient)
 	response, err := s.store.Create(ctx, patient)
 	if err != nil {
@@ -39,7 +46,7 @@ func (s *service) Create(ctx context.Context, newPatient NewPatient) (Patient, e
 }
 
 // GetAll returns all patients.
-func (s *service) GetAll(ctx context.Context) ([]Patient, error) {
+func (s *Service) GetAll(ctx context.Context) ([]Patient, error) {
 	patients, err := s.store.GetAll(ctx)
 	if err != nil {
 		log.Println("error gettin all patients on service layer", err.Error())
@@ -48,8 +55,8 @@ func (s *service) GetAll(ctx context.Context) ([]Patient, error) {
 	return patients, nil
 }
 
-// GetByID returns a product by its ID.
-func (s *service) GetByID(ctx context.Context, id int) (Patient, error) {
+// GetByID returns a patient by its ID.
+func (s *Service) GetByID(ctx context.Context, id int) (Patient, error) {
 	patient, err := s.store.GetByID(ctx, id)
 	if err != nil {
 		log.Println("error getting patient on service layer", err.Error())
@@ -59,8 +66,8 @@ func (s *service) GetByID(ctx context.Context, id int) (Patient, error) {
 	return patient, nil
 }
 
-// Update updates a product.
-func (s *service) Update(ctx context.Context, newPatient NewPatient, id int) (Patient, error) {
+// Update updates a patient.
+func (s *Service) Update(ctx context.Context, newPatient NewPatient, id int) (Patient, error) {
 	patient := requestToPatient(newPatient)
 	patient.ID = id
 	response, err := s.store.Update(ctx, patient)
@@ -72,8 +79,38 @@ func (s *service) Update(ctx context.Context, newPatient NewPatient, id int) (Pa
 	return response, nil
 }
 
-// Delete deletes a product.
-func (s *service) Delete(ctx context.Context, id int) error {
+// Patch patches a patient.
+func (s *Service) Patch(ctx context.Context, patient Patient, np NewPatient) (Patient, error) {
+	if np.FirstName != "" {
+		patient.FirstName = np.FirstName
+	}
+
+	if np.LastName != "" {
+		patient.LastName = np.LastName
+	}
+
+	if np.Address != "" {
+		patient.Address = np.Address
+	}
+
+	if np.DNI != 0 {
+		patient.DNI = np.DNI
+	}
+
+	if !np.DischargeDate.IsZero() {
+		patient.DischargeDate = np.DischargeDate
+	}
+
+	p, err := s.store.Update(ctx, patient)
+	if err != nil {
+		return Patient{}, err
+	}
+
+	return p, nil
+}
+
+// Delete deletes a patient.
+func (s *Service) Delete(ctx context.Context, id int) error {
 	err := s.store.Delete(ctx, id)
 	if err != nil {
 		log.Println("error deleting patient on service layer", err.Error())

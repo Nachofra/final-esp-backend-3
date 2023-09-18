@@ -138,6 +138,7 @@ func (s *Store) Update(_ context.Context, p patient.Patient) (patient.Patient, e
 		p.Address,
 		p.DNI,
 		p.DischargeDate,
+		p.ID,
 	)
 	if err != nil {
 		return patient.Patient{}, err
