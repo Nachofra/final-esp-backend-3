@@ -1,0 +1,30 @@
+version: '3.8'
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: final-esp-backend-3-grupo-1-database
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: clinic
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./clinic.sql:/docker-entrypoint-initdb.d/clinic.sql
+    networks:
+      - network
+
+  app:
+    image: final-esp-backend-3-grupo-1
+    container_name: final-esp-backend-3-grupo-1-app
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+    networks:
+      - network
+
+networks:
+  network:
+    driver: bridge
