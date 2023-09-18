@@ -38,7 +38,7 @@ func (h *Handler) Create() gin.HandlerFunc {
 
 		var request patient.NewPatient
 
-		err := ctx.Bind(&request)
+		err := ctx.ShouldBind(&request)
 		if err != nil {
 			web.Error(ctx, http.StatusBadRequest, "%s", "bad request")
 			return

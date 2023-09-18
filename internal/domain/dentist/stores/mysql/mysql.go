@@ -38,10 +38,10 @@ func New(db *sql.DB) *Store {
 }
 
 // GetAll returns all dentists.
-func (s *Store) GetAll(_ context.Context) []dentist.Dentist {
+func (s *Store) GetAll(_ context.Context) ([]dentist.Dentist, error) {
 	rows, err := s.db.Query(QueryGetAllDentist)
 	if err != nil {
-		return []dentist.Dentist{}
+		return []dentist.Dentist{}, err
 	}
 
 	defer func(rows *sql.Rows) {
@@ -64,17 +64,17 @@ func (s *Store) GetAll(_ context.Context) []dentist.Dentist {
 			&d.RegistrationNumber,
 		)
 		if err != nil {
-			return []dentist.Dentist{}
+			return []dentist.Dentist{}, err
 		}
 
 		dentistsList = append(dentistsList, d)
 	}
 
 	if err := rows.Err(); err != nil {
-		return []dentist.Dentist{}
+		return []dentist.Dentist{}, err
 	}
 
-	return dentistsList
+	return dentistsList, nil
 }
 
 // GetByID returns a dentist by its ID.
