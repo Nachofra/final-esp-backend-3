@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	host     = "localhost"
+	host     = "127.0.0.1"
 	port     = "3306"
 	user     = "root"
 	password = "root"
@@ -16,7 +16,7 @@ const (
 // Config centralizes all the config of dependencies of the whole app.
 type Config struct {
 	DBHost     string `env:"DATABASE_HOST"`
-	DBPort     string `env:"DATABASE_HOST"`
+	DBPort     string `env:"DATABASE_PORT"`
 	DBUser     string `env:"DATABASE_USER"`
 	DBPassword string `env:"DATABASE_PASSWORD"`
 	DBSchema   string `env:"DATABASE_SCHEMA"`
