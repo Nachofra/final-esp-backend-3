@@ -76,7 +76,11 @@ func (h *Handler) Create() gin.HandlerFunc {
 // @Router /dentist [get]
 func (h *Handler) GetAll() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		dentist := h.service.GetAll(ctx)
+		dentist, err := h.service.GetAll(ctx)
+		if err != nil {
+			web.Error(ctx, http.StatusInternalServerError, "%s", "internal server error")
+			return
+		}
 
 		web.Success(ctx, http.StatusOK, gin.H{
 			"data": dentist,
