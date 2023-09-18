@@ -27,7 +27,7 @@ type service struct {
 
 type Service interface {
 	Create(ctx context.Context, newDentist NewDentist) (Dentist, error)
-	GetAll(ctx context.Context) []Dentist
+	GetAll(ctx context.Context) ([]Dentist, error)
 	GetByID(ctx context.Context, id int) (Dentist, error)
 	Update(ctx context.Context, updateDentist UpdateDentist, id int) (Dentist, error)
 	Delete(ctx context.Context, id int) error
@@ -55,9 +55,13 @@ func (s *service) Create(ctx context.Context, newDentist NewDentist) (Dentist, e
 }
 
 // GetAll returns all products.
-func (s *service) GetAll(ctx context.Context) []Dentist {
-	dentists := s.store.GetAll(ctx)
-	return dentists
+func (s *service) GetAll(ctx context.Context) ([]Dentist, error) {
+	dentists, err := s.store.GetAll(ctx)
+	if err != nil {
+		log.Println("error getting dentists on service layer", err.Error())
+		return []Dentist{}, errors.New("service error. Method GetAll")
+	}
+	return dentists, nil
 }
 
 // GetByID returns a product by its ID.
