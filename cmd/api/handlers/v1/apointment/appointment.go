@@ -3,6 +3,9 @@ package apointment
 import (
 	"errors"
 	"github.com/Nachofra/final-esp-backend-3/internal/domain/appointment"
+	"github.com/Nachofra/final-esp-backend-3/internal/domain/dentist"
+	"github.com/Nachofra/final-esp-backend-3/internal/domain/patient"
+	"github.com/Nachofra/final-esp-backend-3/pkg/time"
 	"github.com/Nachofra/final-esp-backend-3/pkg/web"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -16,12 +19,16 @@ var (
 )
 
 type Handler struct {
-	service appointment.Service
+	service        appointment.Service
+	patientService patient.Service
+	dentistService dentist.Service
 }
 
-func NewHandler(service appointment.Service) *Handler {
+func NewHandler(service appointment.Service, patientService patient.Service, dentistService dentist.Service) *Handler {
 	return &Handler{
-		service: service,
+		service:        service,
+		patientService: patientService,
+		dentistService: dentistService,
 	}
 }
 
@@ -275,13 +282,22 @@ func (h *Handler) Delete() gin.HandlerFunc {
 // @Success 200 {object} web.response
 // @Failure 400 {object} web.errorResponse
 // @Failure 500 {object} web.errorResponse
-// @Router /appointment/:dni [post]
+// @Router /appointment/dni [post]
 func (h *Handler) CreateByDNI() gin.HandlerFunc {
 	// TODO crear metodo para crear turno con dni de paciente
 	return func(ctx *gin.Context) {
 
-		ctx.Param("dni")
-		var request appointment.NewAppointment
+		type NewCreate struct {
+			PatientDNI    int       `json:"patient_dni"`
+			DentistNumber int       `json:"dentist_number"`
+			Date          time.Time `json:"date"`
+			Description   string    `json:"description"`
+		}
+
+		var request NewCreate
+		var app appointment.NewAppointment
+		var pa patient.Patient
+		var de dentist.Dentist
 
 		err := ctx.ShouldBindJSON(&request)
 		if err != nil {
@@ -289,7 +305,23 @@ func (h *Handler) CreateByDNI() gin.HandlerFunc {
 			return
 		}
 
-		app, err := h.service.Create(ctx, request)
+		pa, err = h.patientService.GetByDNI(ctx, request.PatientDNI)
+		if err != nil {
+			web.Error(ctx, http.StatusUnprocessableEntity, "%s", ErrUnprocessableEntity.Error())
+			return
+		}
+		de, err = h.dentistService.GetByRegistrationNumber(ctx, request.DentistNumber)
+		if err != nil {
+			web.Error(ctx, http.StatusUnprocessableEntity, "%s", ErrUnprocessableEntity.Error())
+			return
+		}
+
+		app.PatientID = pa.ID
+		app.DentistID = de.ID
+		app.Date = request.Date
+		app.Description = request.Description
+
+		newApp, err := h.service.Create(ctx, app)
 		if err != nil {
 			switch {
 			case errors.Is(err, appointment.ErrAlreadyExists):
@@ -306,6 +338,6 @@ func (h *Handler) CreateByDNI() gin.HandlerFunc {
 				return
 			}
 		}
-		web.Success(ctx, http.StatusCreated, app)
+		web.Success(ctx, http.StatusCreated, newApp)
 	}
 }
