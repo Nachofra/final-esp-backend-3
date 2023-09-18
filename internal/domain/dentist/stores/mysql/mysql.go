@@ -3,6 +3,7 @@ package mysql
 import (
 	"context"
 	"database/sql"
+
 	"github.com/Nachofra/final-esp-backend-3/internal/domain/dentist"
 )
 
@@ -37,15 +38,16 @@ func New(db *sql.DB) *Store {
 }
 
 // GetAll returns all dentists.
-func (s *Store) GetAll(_ context.Context) ([]dentist.Dentist, error) {
+func (s *Store) GetAll(_ context.Context) []dentist.Dentist {
 	rows, err := s.db.Query(QueryGetAllDentist)
 	if err != nil {
-		return []dentist.Dentist{}, err
+		return []dentist.Dentist{}
 	}
 
 	defer func(rows *sql.Rows) {
 		err := rows.Close()
 		if err != nil {
+			//TODO que hago aca?
 			panic("IMPLEMENT LOGGER")
 		}
 	}(rows)
@@ -62,17 +64,17 @@ func (s *Store) GetAll(_ context.Context) ([]dentist.Dentist, error) {
 			&d.RegistrationNumber,
 		)
 		if err != nil {
-			return []dentist.Dentist{}, err
+			return []dentist.Dentist{}
 		}
 
 		dentistsList = append(dentistsList, d)
 	}
 
 	if err := rows.Err(); err != nil {
-		return []dentist.Dentist{}, err
+		return []dentist.Dentist{}
 	}
 
-	return dentistsList, nil
+	return dentistsList
 }
 
 // GetByID returns a dentist by its ID.
@@ -123,6 +125,7 @@ func (s *Store) Create(_ context.Context, d dentist.Dentist) (dentist.Dentist, e
 	defer func(statement *sql.Stmt) {
 		err := statement.Close()
 		if err != nil {
+			//TODO que hago aca?
 			panic("IMPLEMENT LOGGER")
 		}
 	}(statement)
@@ -156,6 +159,7 @@ func (s *Store) Update(_ context.Context, d dentist.Dentist) (dentist.Dentist, e
 	defer func(statement *sql.Stmt) {
 		err := statement.Close()
 		if err != nil {
+			//TODO que hago aca?
 			panic("IMPLEMENT LOGGER")
 		}
 	}(statement)
