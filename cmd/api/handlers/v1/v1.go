@@ -9,13 +9,13 @@ import (
 
 // Config has all the dependencies and requirements to initialize handlers.
 type Config struct {
-	Log       log.Logger
+	Log       *log.Logger
 	DB        *sql.DB
 	Validator *validator.Validate
 }
 
 // Routes sets all the version 1 routes.
-func Routes(eng *gin.Engine, cfg *Config) {
+func Routes(eng *gin.Engine, cfg Config) {
 	cfg.Log.Println("configuring v1 routes")
 
 	const prefix = "/v1"

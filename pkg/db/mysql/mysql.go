@@ -24,15 +24,9 @@ func New(options ...func(*Config)) *Config {
 	return db
 }
 
-// Open establishes a connection to the database using the provided configuration,
-// performs a handshake by calling Ping(), and returns the database connection.
+// Open establishes a connection to the database using the provided configuration and returns the database connection.
 func Open(cfg *Config) (*sql.DB, error) {
 	db, err := cfg.start()
-	if err != nil {
-		return nil, err
-	}
-
-	err = db.Ping()
 	if err != nil {
 		return nil, err
 	}

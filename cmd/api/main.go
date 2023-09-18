@@ -9,6 +9,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	_ "github.com/go-sql-driver/mysql"
 	"log"
+	"os"
 )
 
 func main() {
@@ -33,8 +34,10 @@ func main() {
 	eng.Use(middleware.Logger())
 	eng.Use(middleware.Authenticate())
 
-	v1.Routes(eng, &v1.Config{
-		Log:       log.Logger{},
+	logger := log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime)
+
+	v1.Routes(eng, v1.Config{
+		Log:       logger,
 		DB:        database,
 		Validator: v,
 	})
