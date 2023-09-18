@@ -27,7 +27,7 @@ func Logger() gin.HandlerFunc {
 		fmt.Printf("TIME: %v\n"+
 			"PATH: %s%s\n"+
 			"METHOD: %s\n"+
-			"SIZE: %d",
+			"SIZE: %d\n",
 			localTime, basePath, path, method, size)
 	}
 }
