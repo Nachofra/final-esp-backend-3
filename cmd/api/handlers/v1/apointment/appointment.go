@@ -196,7 +196,7 @@ func (h *Handler) Update() gin.HandlerFunc {
 // @Success 200 {object} web.response
 // @Failure 400 {object} web.errorResponse
 // @Failure 500 {object} web.errorResponse
-// @Router /appointment/:id [put]
+// @Router /appointment/:id [patch]
 func (h *Handler) PatchUpdate() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 
