@@ -17,18 +17,18 @@ type Appointment struct {
 
 // NewAppointment describes the data needed to create a new Appointment.
 type NewAppointment struct {
-	PatientID   int              `json:"patient_id"`
-	DentistID   int              `json:"dentist_id"`
-	Date        custom_time.Time `json:"date"`
-	Description string           `json:"description"`
+	PatientID   int              `json:"patient_id"  validate:"required"`
+	DentistID   int              `json:"dentist_id"  validate:"required"`
+	Date        custom_time.Time `json:"date"        validate:"required"`
+	Description string           `json:"description" validate:"required"`
 }
 
 // UpdateAppointment describes the data needed to update an Appointment.
 type UpdateAppointment struct {
-	PatientID   int              `json:"patient_id"`
-	DentistID   int              `json:"dentist_id"`
-	Date        custom_time.Time `json:"date"`
-	Description string           `json:"description"`
+	PatientID   int              `json:"patient_id"  validate:"required"`
+	DentistID   int              `json:"dentist_id"  validate:"required"`
+	Date        custom_time.Time `json:"date"        validate:"required"`
+	Description string           `json:"description" validate:"required"`
 }
 
 // PatchAppointment describes the data needed to patch an Appointment.
@@ -43,7 +43,7 @@ type PatchAppointment struct {
 type FilterAppointment struct {
 	PatientID *int              `form:"patient_id"`
 	DentistID *int              `form:"dentist_id"`
-	DNI       *int              `form:"dni" validate:"len=8"` // TODO: add validation to DNI when doing dependencies initialization (we need to create a singleton validator for all the services that needs it)
+	DNI       *int              `form:"dni" validate:"min=10000000,max=999999999"`
 	FromDate  *custom_time.Time `form:"from_date"`
 	ToDate    *custom_time.Time `form:"to_date"`
 }

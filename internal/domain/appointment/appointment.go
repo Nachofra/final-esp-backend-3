@@ -7,7 +7,7 @@ import (
 
 var (
 	ErrNotFound      = errors.New("appointment not found")
-	ErrConflict      = errors.New("constraint conflict while storing")
+	ErrConflict      = errors.New("constraint conflict while doing an action with the store layer")
 	ErrAlreadyExists = errors.New("appointment already exists")
 	ErrValueExceeded = errors.New("attribute value exceed type limit")
 )

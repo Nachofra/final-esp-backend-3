@@ -2,6 +2,8 @@ package dentist
 
 import (
 	"errors"
+	"github.com/Nachofra/final-esp-backend-3/pkg/en_validator"
+	"github.com/go-playground/validator/v10"
 	"net/http"
 	"strconv"
 
@@ -16,12 +18,14 @@ var (
 )
 
 type Handler struct {
-	service dentist.Service
+	service   dentist.Service
+	validator *en_validator.Validator
 }
 
-func NewHandler(service dentist.Service) *Handler {
+func NewHandler(service dentist.Service, validator *en_validator.Validator) *Handler {
 	return &Handler{
-		service: service,
+		service:   service,
+		validator: validator,
 	}
 }
 
@@ -44,6 +48,17 @@ func (h *Handler) Create() gin.HandlerFunc {
 		err := ctx.ShouldBindJSON(&request)
 		if err != nil {
 			web.Error(ctx, http.StatusUnprocessableEntity, "%s", err)
+			return
+		}
+
+		err = h.validator.Validate.Struct(request)
+		if err != nil {
+			var validationErrors validator.ValidationErrors
+			errors.As(err, &validationErrors)
+
+			msg := h.validator.Translate(validationErrors)
+
+			web.Error(ctx, http.StatusUnprocessableEntity, "%v", msg)
 			return
 		}
 
@@ -139,9 +154,20 @@ func (h *Handler) Update() gin.HandlerFunc {
 
 		var request dentist.UpdateDentist
 
-		errBind := ctx.ShouldBindJSON(&request)
-		if errBind != nil {
-			web.Error(ctx, http.StatusUnprocessableEntity, "%s", errBind)
+		err := ctx.ShouldBindJSON(&request)
+		if err != nil {
+			web.Error(ctx, http.StatusUnprocessableEntity, "%s", err)
+			return
+		}
+
+		err = h.validator.Validate.Struct(request)
+		if err != nil {
+			var validationErrors validator.ValidationErrors
+			errors.As(err, &validationErrors)
+
+			msg := h.validator.Translate(validationErrors)
+
+			web.Error(ctx, http.StatusUnprocessableEntity, "%v", msg)
 			return
 		}
 
@@ -156,6 +182,9 @@ func (h *Handler) Update() gin.HandlerFunc {
 		d, err := h.service.Update(ctx, request, idInt)
 		if err != nil {
 			switch {
+			case errors.Is(err, dentist.ErrAlreadyExists):
+				web.Error(ctx, http.StatusConflict, "%s", err)
+				return
 			case errors.Is(err, dentist.ErrConflict):
 				web.Error(ctx, http.StatusConflict, "%s", err)
 				return
@@ -223,9 +252,9 @@ func (h *Handler) Patch() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 
 		var de dentist.Dentist
-		var nd dentist.NewDentist
+		var pd dentist.PatchDentist
 
-		errBind := ctx.ShouldBindJSON(&nd)
+		errBind := ctx.ShouldBindJSON(&pd)
 		if errBind != nil {
 			web.Error(ctx, http.StatusUnprocessableEntity, "%s", errBind)
 			return
@@ -250,9 +279,12 @@ func (h *Handler) Patch() gin.HandlerFunc {
 			}
 		}
 
-		d, err := h.service.Patch(ctx, de, nd)
+		d, err := h.service.Patch(ctx, de, pd)
 		if err != nil {
 			switch {
+			case errors.Is(err, dentist.ErrAlreadyExists):
+				web.Error(ctx, http.StatusConflict, "%s", err)
+				return
 			case errors.Is(err, dentist.ErrConflict):
 				web.Error(ctx, http.StatusConflict, "%s", err)
 				return

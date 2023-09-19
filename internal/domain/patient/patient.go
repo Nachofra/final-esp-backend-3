@@ -7,7 +7,7 @@ import (
 
 var (
 	ErrNotFound      = errors.New("patient not found")
-	ErrConflict      = errors.New("constraint conflict while storing")
+	ErrConflict      = errors.New("constraint conflict while doing an action with the store layer")
 	ErrAlreadyExists = errors.New("patient already exists, dni must be unique")
 	ErrValueExceeded = errors.New("attribute value exceed type limit")
 )

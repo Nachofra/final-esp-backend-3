@@ -6,8 +6,10 @@ import (
 	"github.com/Nachofra/final-esp-backend-3/internal/domain/dentist"
 	"github.com/Nachofra/final-esp-backend-3/internal/domain/patient"
 	"github.com/Nachofra/final-esp-backend-3/pkg/custom_time"
+	"github.com/Nachofra/final-esp-backend-3/pkg/en_validator"
 	"github.com/Nachofra/final-esp-backend-3/pkg/web"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"net/http"
 	"strconv"
 )
@@ -21,13 +23,15 @@ type Handler struct {
 	service        appointment.Service
 	patientService patient.Service
 	dentistService dentist.Service
+	validator      *en_validator.Validator
 }
 
-func NewHandler(service appointment.Service, patientService patient.Service, dentistService dentist.Service) *Handler {
+func NewHandler(service appointment.Service, patientService patient.Service, dentistService dentist.Service, validator *en_validator.Validator) *Handler {
 	return &Handler{
 		service:        service,
 		patientService: patientService,
 		dentistService: dentistService,
+		validator:      validator,
 	}
 }
 
@@ -50,6 +54,17 @@ func (h *Handler) Create() gin.HandlerFunc {
 		err := ctx.ShouldBindJSON(&request)
 		if err != nil {
 			web.Error(ctx, http.StatusUnprocessableEntity, "%s", err)
+			return
+		}
+
+		err = h.validator.Validate.Struct(request)
+		if err != nil {
+			var validationErrors validator.ValidationErrors
+			errors.As(err, &validationErrors)
+
+			msg := h.validator.Translate(validationErrors)
+
+			web.Error(ctx, http.StatusUnprocessableEntity, "%v", msg)
 			return
 		}
 
@@ -91,6 +106,17 @@ func (h *Handler) GetAll() gin.HandlerFunc {
 		err := ctx.ShouldBindQuery(&filters)
 		if err != nil {
 			web.Error(ctx, http.StatusBadRequest, "%s", err)
+			return
+		}
+
+		err = h.validator.Validate.Struct(filters)
+		if err != nil {
+			var validationErrors validator.ValidationErrors
+			errors.As(err, &validationErrors)
+
+			msg := h.validator.Translate(validationErrors)
+
+			web.Error(ctx, http.StatusUnprocessableEntity, "%v", msg)
 			return
 		}
 
@@ -152,9 +178,20 @@ func (h *Handler) Update() gin.HandlerFunc {
 
 		var ua appointment.UpdateAppointment
 
-		errBind := ctx.ShouldBindJSON(&ua)
-		if errBind != nil {
-			web.Error(ctx, http.StatusUnprocessableEntity, "%s", errBind)
+		err := ctx.ShouldBindJSON(&ua)
+		if err != nil {
+			web.Error(ctx, http.StatusUnprocessableEntity, "%s", err)
+			return
+		}
+
+		err = h.validator.Validate.Struct(ua)
+		if err != nil {
+			var validationErrors validator.ValidationErrors
+			errors.As(err, &validationErrors)
+
+			msg := h.validator.Translate(validationErrors)
+
+			web.Error(ctx, http.StatusUnprocessableEntity, "%v", msg)
 			return
 		}
 
@@ -169,6 +206,9 @@ func (h *Handler) Update() gin.HandlerFunc {
 		app, err := h.service.Update(ctx, idInt, ua)
 		if err != nil {
 			switch {
+			case errors.Is(err, appointment.ErrAlreadyExists):
+				web.Error(ctx, http.StatusConflict, "%s", err)
+				return
 			case errors.Is(err, appointment.ErrConflict):
 				web.Error(ctx, http.StatusConflict, "%s", err)
 				return
@@ -229,6 +269,9 @@ func (h *Handler) Patch() gin.HandlerFunc {
 		a, err := h.service.Patch(ctx, app, pa)
 		if err != nil {
 			switch {
+			case errors.Is(err, appointment.ErrAlreadyExists):
+				web.Error(ctx, http.StatusConflict, "%s", err)
+				return
 			case errors.Is(err, appointment.ErrConflict):
 				web.Error(ctx, http.StatusConflict, "%s", err)
 				return
@@ -294,7 +337,7 @@ func (h *Handler) CreateByDNI() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 
 		type NewCreate struct {
-			PatientDNI    int              `json:"patient_dni"`
+			PatientDNI    int              `json:"patient_dni" validate:"min=10000000,max=999999999"`
 			DentistNumber int              `json:"dentist_number"`
 			Date          custom_time.Time `json:"date"`
 			Description   string           `json:"description"`
@@ -308,6 +351,17 @@ func (h *Handler) CreateByDNI() gin.HandlerFunc {
 		err := ctx.ShouldBindJSON(&request)
 		if err != nil {
 			web.Error(ctx, http.StatusUnprocessableEntity, "%s", err)
+			return
+		}
+
+		err = h.validator.Validate.Struct(request)
+		if err != nil {
+			var validationErrors validator.ValidationErrors
+			errors.As(err, &validationErrors)
+
+			msg := h.validator.Translate(validationErrors)
+
+			web.Error(ctx, http.StatusUnprocessableEntity, "%v", msg)
 			return
 		}
 

@@ -13,9 +13,9 @@ import (
 	mysqlDentist "github.com/Nachofra/final-esp-backend-3/internal/domain/dentist/stores/mysql"
 	"github.com/Nachofra/final-esp-backend-3/internal/domain/patient"
 	mysqlPatient "github.com/Nachofra/final-esp-backend-3/internal/domain/patient/stores/mysql"
+	"github.com/Nachofra/final-esp-backend-3/pkg/en_validator"
 	"github.com/Nachofra/final-esp-backend-3/pkg/middleware"
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"log"
@@ -25,7 +25,7 @@ import (
 type Config struct {
 	Log       *log.Logger
 	DB        *sql.DB
-	Validator *validator.Validate
+	Validator *en_validator.Validator
 	Env       *config.Config
 }
 
@@ -45,7 +45,7 @@ func Routes(eng *gin.Engine, cfg Config) {
 	repoAppointment := mysqlAppointment.NewStore(cfg.DB)
 	appointmentService := appointment.NewService(repoAppointment)
 
-	dentistHandler := handlerDentist.NewHandler(dentistService)
+	dentistHandler := handlerDentist.NewHandler(dentistService, cfg.Validator)
 	d := v1.Group("/dentist")
 	{
 		d.GET("/:id", dentistHandler.GetByID())
@@ -56,7 +56,7 @@ func Routes(eng *gin.Engine, cfg Config) {
 		d.DELETE("/:id", middleware.Authenticate(), dentistHandler.Delete())
 	}
 
-	patientHandler := handlerPatient.NewHandler(patientService)
+	patientHandler := handlerPatient.NewHandler(patientService, cfg.Validator)
 	p := v1.Group("/patient")
 	{
 		p.GET("/:id", patientHandler.GetByID())
@@ -67,7 +67,7 @@ func Routes(eng *gin.Engine, cfg Config) {
 		p.DELETE("/:id", middleware.Authenticate(), patientHandler.Delete())
 	}
 
-	appointmentHandler := handlerAppointment.NewHandler(appointmentService, patientService, dentistService)
+	appointmentHandler := handlerAppointment.NewHandler(appointmentService, patientService, dentistService, cfg.Validator)
 	a := v1.Group("/appointment")
 	{
 		a.GET("/:id", appointmentHandler.GetByID())

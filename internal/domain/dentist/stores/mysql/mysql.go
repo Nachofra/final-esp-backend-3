@@ -191,6 +191,8 @@ func (s *Store) Update(_ context.Context, d dentist.Dentist) (dentist.Dentist, e
 	if err != nil {
 		err := mysql.CheckError(err)
 		switch {
+		case errors.Is(err, mysql.ErrDBDuplicateEntry):
+			return dentist.Dentist{}, dentist.ErrAlreadyExists
 		case errors.Is(err, mysql.ErrDBConflict):
 			return dentist.Dentist{}, dentist.ErrConflict
 		case errors.Is(err, mysql.ErrDBValueExceeded):

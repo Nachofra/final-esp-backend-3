@@ -130,6 +130,8 @@ func (s *Store) Update(_ context.Context, a appointment.Appointment) (appointmen
 	if err != nil {
 		err := mysql.CheckError(err)
 		switch {
+		case errors.Is(err, mysql.ErrDBDuplicateEntry):
+			return appointment.Appointment{}, appointment.ErrAlreadyExists
 		case errors.Is(err, mysql.ErrDBConflict):
 			return appointment.Appointment{}, appointment.ErrConflict
 		case errors.Is(err, mysql.ErrDBValueExceeded):

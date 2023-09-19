@@ -7,7 +7,7 @@ import (
 
 var (
 	ErrNotFound      = errors.New("dentist not found")
-	ErrConflict      = errors.New("constraint conflict while storing")
+	ErrConflict      = errors.New("constraint conflict while doing an action with the store layer")
 	ErrAlreadyExists = errors.New("dentist already exists, registration number must be unique")
 	ErrValueExceeded = errors.New("attribute value exceed type limit")
 )
@@ -35,7 +35,7 @@ type Service interface {
 	GetByRegistrationNumber(ctx context.Context, rn int) (Dentist, error)
 	Update(ctx context.Context, updateDentist UpdateDentist, id int) (Dentist, error)
 	Delete(ctx context.Context, id int) error
-	Patch(ctx context.Context, dentist Dentist, nd NewDentist) (Dentist, error)
+	Patch(ctx context.Context, dentist Dentist, pd PatchDentist) (Dentist, error)
 }
 
 // NewService creates a new product service.
@@ -105,17 +105,17 @@ func (s *service) Delete(ctx context.Context, id int) error {
 }
 
 // Patch patches an appointment.
-func (s *service) Patch(ctx context.Context, dentist Dentist, nd NewDentist) (Dentist, error) {
-	if nd.FirstName != "" {
-		dentist.FirstName = nd.FirstName
+func (s *service) Patch(ctx context.Context, dentist Dentist, pd PatchDentist) (Dentist, error) {
+	if pd.FirstName != nil {
+		dentist.FirstName = *pd.FirstName
 	}
 
-	if nd.LastName != "" {
-		dentist.LastName = nd.LastName
+	if pd.LastName != nil {
+		dentist.LastName = *pd.LastName
 	}
 
-	if nd.RegistrationNumber != 0 {
-		dentist.RegistrationNumber = nd.RegistrationNumber
+	if pd.RegistrationNumber != nil {
+		dentist.RegistrationNumber = *pd.RegistrationNumber
 	}
 
 	d, err := s.store.Update(ctx, dentist)
