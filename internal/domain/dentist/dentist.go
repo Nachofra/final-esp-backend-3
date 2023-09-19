@@ -3,6 +3,7 @@ package dentist
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 )
 
@@ -115,6 +116,10 @@ func (s *service) Delete(ctx context.Context, id int) error {
 
 // Patch patches an appointment.
 func (s *service) Patch(ctx context.Context, dentist Dentist, pd PatchDentist) (Dentist, error) {
+	fmt.Println(dentist)
+	fmt.Println(pd.FirstName)
+	fmt.Println(pd.LastName)
+	fmt.Println(pd.RegistrationNumber)
 	if pd.FirstName != nil {
 		dentist.FirstName = *pd.FirstName
 	}

@@ -168,6 +168,7 @@ func (s *Store) Update(_ context.Context, d dentist.Dentist) (dentist.Dentist, e
 		d.FirstName,
 		d.LastName,
 		d.RegistrationNumber,
+		d.ID,
 	)
 	if err != nil {
 		return dentist.Dentist{}, err
