@@ -20,3 +20,12 @@ type NewPatient struct {
 	DNI           int              `json:"dni"`
 	DischargeDate custom_time.Time `json:"discharge_date"`
 }
+
+// PatchPatient describes the data needed to patch a Patient.
+type PatchPatient struct {
+	FirstName     *string           `json:"first_name"`
+	LastName      *string           `json:"last_name"`
+	Address       *string           `json:"address"`
+	DNI           *int              `json:"dni"`
+	DischargeDate *custom_time.Time `json:"discharge_date"`
+}

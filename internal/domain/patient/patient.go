@@ -3,20 +3,18 @@ package patient
 import (
 	"context"
 	"errors"
-	"log"
 )
 
 var (
-	ErrEmptyList = errors.New("the list is empty")
-	ErrNotFound  = errors.New("Patient not found")
-	ErrStatement = errors.New("error preparing statement")
-	ErrExec      = errors.New("error exect statement")
-	ErrLastId    = errors.New("error getting last id")
+	ErrNotFound      = errors.New("patient not found")
+	ErrConflict      = errors.New("constraint conflict while storing")
+	ErrAlreadyExists = errors.New("patient already exists, dni must be unique")
+	ErrValueExceeded = errors.New("attribute value exceed type limit")
 )
 
 type Store interface {
 	Create(ctx context.Context, patient Patient) (Patient, error)
-	GetAll(ctx context.Context) ([]Patient, error)
+	GetAll(ctx context.Context) []Patient
 	GetByID(ctx context.Context, id int) (Patient, error)
 	GetByDNI(ctx context.Context, dni int) (Patient, error)
 	Update(ctx context.Context, patient Patient) (Patient, error)
@@ -37,42 +35,36 @@ func NewService(store Store) *Service {
 // Create creates a new patient.
 func (s *Service) Create(ctx context.Context, newPatient NewPatient) (Patient, error) {
 	patient := requestToPatient(newPatient)
+
 	response, err := s.store.Create(ctx, patient)
 	if err != nil {
-		log.Println("error creating all patients on service layer")
-		return Patient{}, errors.New("service error. Method Create")
+		return Patient{}, err
 	}
 
 	return response, nil
 }
 
 // GetAll returns all patients.
-func (s *Service) GetAll(ctx context.Context) ([]Patient, error) {
-	patients, err := s.store.GetAll(ctx)
-	if err != nil {
-		log.Println("error gettin all patients on service layer", err.Error())
-		return []Patient{}, errors.New("service error. Method GetAll")
-	}
-	return patients, nil
+func (s *Service) GetAll(ctx context.Context) []Patient {
+	patients := s.store.GetAll(ctx)
+	return patients
 }
 
 // GetByID returns a patient by its ID.
 func (s *Service) GetByID(ctx context.Context, id int) (Patient, error) {
 	patient, err := s.store.GetByID(ctx, id)
 	if err != nil {
-		log.Println("error getting patient on service layer", err.Error())
-		return Patient{}, errors.New("service error. Method GetByID")
+		return Patient{}, err
 	}
 
 	return patient, nil
 }
 
-// GetByID returns a patient by its DNI.
+// GetByDNI returns a patient by its DNI.
 func (s *Service) GetByDNI(ctx context.Context, dni int) (Patient, error) {
 	patient, err := s.store.GetByDNI(ctx, dni)
 	if err != nil {
-		log.Println("error getting patient on service layer", err.Error())
-		return Patient{}, errors.New("service error. Method GetByDNI")
+		return Patient{}, err
 	}
 
 	return patient, nil
@@ -82,35 +74,35 @@ func (s *Service) GetByDNI(ctx context.Context, dni int) (Patient, error) {
 func (s *Service) Update(ctx context.Context, newPatient NewPatient, id int) (Patient, error) {
 	patient := requestToPatient(newPatient)
 	patient.ID = id
+
 	response, err := s.store.Update(ctx, patient)
 	if err != nil {
-		log.Println("error updating patient on service layer", err.Error())
-		return Patient{}, errors.New("service error. Method Update")
+		return Patient{}, err
 	}
 
 	return response, nil
 }
 
 // Patch patches a patient.
-func (s *Service) Patch(ctx context.Context, patient Patient, np NewPatient) (Patient, error) {
-	if np.FirstName != "" {
-		patient.FirstName = np.FirstName
+func (s *Service) Patch(ctx context.Context, patient Patient, pp PatchPatient) (Patient, error) {
+	if pp.FirstName != nil {
+		patient.FirstName = *pp.FirstName
 	}
 
-	if np.LastName != "" {
-		patient.LastName = np.LastName
+	if pp.LastName != nil {
+		patient.LastName = *pp.LastName
 	}
 
-	if np.Address != "" {
-		patient.Address = np.Address
+	if pp.Address != nil {
+		patient.Address = *pp.Address
 	}
 
-	if np.DNI != 0 {
-		patient.DNI = np.DNI
+	if pp.DNI != nil {
+		patient.DNI = *pp.DNI
 	}
 
-	if !np.DischargeDate.IsZero() {
-		patient.DischargeDate = np.DischargeDate
+	if pp.DischargeDate != nil {
+		patient.DischargeDate = *pp.DischargeDate
 	}
 
 	p, err := s.store.Update(ctx, patient)
@@ -125,13 +117,13 @@ func (s *Service) Patch(ctx context.Context, patient Patient, np NewPatient) (Pa
 func (s *Service) Delete(ctx context.Context, id int) error {
 	err := s.store.Delete(ctx, id)
 	if err != nil {
-		log.Println("error deleting patient on service layer", err.Error())
-		return errors.New("service error. Method Delete")
+		return err
 	}
 
 	return nil
 }
 
+// requestToPatient parses NewPatient to Patient
 func requestToPatient(newPatient NewPatient) Patient {
 	var patient Patient
 	patient.FirstName = newPatient.FirstName

@@ -63,7 +63,7 @@ func Routes(eng *gin.Engine, cfg Config) {
 		p.GET("/", patientHandler.GetAll())
 		p.POST("/", middleware.Authenticate(), patientHandler.Create())
 		p.PUT("/:id", middleware.Authenticate(), patientHandler.Update())
-		p.PATCH("/:id", middleware.Authenticate(), patientHandler.PatchUpdate())
+		p.PATCH("/:id", middleware.Authenticate(), patientHandler.Patch())
 		p.DELETE("/:id", middleware.Authenticate(), patientHandler.Delete())
 	}
 

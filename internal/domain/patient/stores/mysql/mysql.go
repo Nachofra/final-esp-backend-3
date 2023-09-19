@@ -3,7 +3,10 @@ package patient
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"github.com/Nachofra/final-esp-backend-3/internal/domain/patient"
+	"github.com/Nachofra/final-esp-backend-3/pkg/mysql"
+	"log"
 )
 
 var (
@@ -32,24 +35,25 @@ func NewStore(db *sql.DB) *Store {
 }
 
 // GetAll returns all patients.
-func (s *Store) GetAll(_ context.Context) ([]patient.Patient, error) {
+func (s *Store) GetAll(_ context.Context) []patient.Patient {
 	rows, err := s.db.Query(QueryGetAllPatient)
 	if err != nil {
-		return []patient.Patient{}, err
+		return []patient.Patient{}
 	}
+
 	defer func(rows *sql.Rows) {
-		err := rows.Close()
+		err = rows.Close()
 		if err != nil {
-			panic("IMPLEMENT LOGGER")
+			log.Println(err)
 		}
 	}(rows)
 
-	var patientsList []patient.Patient
+	patientsList := make([]patient.Patient, 0)
 
 	for rows.Next() {
 		var p patient.Patient
 
-		err := rows.Scan(
+		err = rows.Scan(
 			&p.ID,
 			&p.FirstName,
 			&p.LastName,
@@ -58,14 +62,13 @@ func (s *Store) GetAll(_ context.Context) ([]patient.Patient, error) {
 			&p.DischargeDate.Time,
 		)
 		if err != nil {
-			return []patient.Patient{}, err
+			return []patient.Patient{}
 		}
+
 		patientsList = append(patientsList, p)
 	}
-	if err := rows.Err(); err != nil {
-		return []patient.Patient{}, err
-	}
-	return patientsList, nil
+
+	return patientsList
 }
 
 // GetByID returns a patient by its ID.
@@ -83,8 +86,15 @@ func (s *Store) GetByID(_ context.Context, id int) (patient.Patient, error) {
 		&p.DischargeDate.Time,
 	)
 	if err != nil {
-		return patient.Patient{}, err
+		err := mysql.CheckError(err)
+		switch {
+		case errors.Is(err, mysql.ErrDBNoRows):
+			return patient.Patient{}, patient.ErrNotFound
+		default:
+			return patient.Patient{}, err
+		}
 	}
+
 	return p, nil
 }
 
@@ -103,8 +113,15 @@ func (s *Store) GetByDNI(_ context.Context, dni int) (patient.Patient, error) {
 		&p.DischargeDate.Time,
 	)
 	if err != nil {
-		return patient.Patient{}, err
+		err := mysql.CheckError(err)
+		switch {
+		case errors.Is(err, mysql.ErrDBNoRows):
+			return patient.Patient{}, patient.ErrNotFound
+		default:
+			return patient.Patient{}, err
+		}
 	}
+
 	return p, nil
 }
 
@@ -112,14 +129,16 @@ func (s *Store) GetByDNI(_ context.Context, dni int) (patient.Patient, error) {
 func (s *Store) Create(_ context.Context, p patient.Patient) (patient.Patient, error) {
 	statement, err := s.db.Prepare(QueryInsertPatient)
 	if err != nil {
-		return patient.Patient{}, patient.ErrStatement
+		return patient.Patient{}, err
 	}
+
 	defer func(statement *sql.Stmt) {
-		err := statement.Close()
+		err = statement.Close()
 		if err != nil {
-			panic("IMPLEMENT LOGGER")
+			log.Println(err)
 		}
 	}(statement)
+
 	result, err := statement.Exec(
 		p.FirstName,
 		p.LastName,
@@ -128,12 +147,24 @@ func (s *Store) Create(_ context.Context, p patient.Patient) (patient.Patient, e
 		p.DischargeDate.Time,
 	)
 	if err != nil {
-		return patient.Patient{}, patient.ErrExec
+		err := mysql.CheckError(err)
+		switch {
+		case errors.Is(err, mysql.ErrDBDuplicateEntry):
+			return patient.Patient{}, patient.ErrAlreadyExists
+		case errors.Is(err, mysql.ErrDBConflict):
+			return patient.Patient{}, patient.ErrConflict
+		case errors.Is(err, mysql.ErrDBValueExceeded):
+			return patient.Patient{}, patient.ErrValueExceeded
+		default:
+			return patient.Patient{}, err
+		}
 	}
+
 	lastId, err := result.LastInsertId()
 	if err != nil {
-		return patient.Patient{}, patient.ErrLastId
+		return patient.Patient{}, err
 	}
+
 	p.ID = int(lastId)
 
 	return p, nil
@@ -145,12 +176,14 @@ func (s *Store) Update(_ context.Context, p patient.Patient) (patient.Patient, e
 	if err != nil {
 		return patient.Patient{}, err
 	}
+
 	defer func(statement *sql.Stmt) {
-		err := statement.Close()
+		err = statement.Close()
 		if err != nil {
-			panic("IMPLEMENT LOGGER")
+			log.Println(err)
 		}
 	}(statement)
+
 	result, err := statement.Exec(
 		p.FirstName,
 		p.LastName,
@@ -160,15 +193,26 @@ func (s *Store) Update(_ context.Context, p patient.Patient) (patient.Patient, e
 		p.ID,
 	)
 	if err != nil {
-		return patient.Patient{}, err
+		err := mysql.CheckError(err)
+		switch {
+		case errors.Is(err, mysql.ErrDBConflict):
+			return patient.Patient{}, patient.ErrConflict
+		case errors.Is(err, mysql.ErrDBValueExceeded):
+			return patient.Patient{}, patient.ErrValueExceeded
+		default:
+			return patient.Patient{}, err
+		}
 	}
+
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		return patient.Patient{}, err
 	}
+
 	if rowsAffected < 1 {
 		return patient.Patient{}, patient.ErrNotFound
 	}
+
 	return p, nil
 }
 
@@ -176,14 +220,23 @@ func (s *Store) Update(_ context.Context, p patient.Patient) (patient.Patient, e
 func (s *Store) Delete(_ context.Context, id int) error {
 	result, err := s.db.Exec(QueryDeletePatient, id)
 	if err != nil {
-		return err
+		err := mysql.CheckError(err)
+		switch {
+		case errors.Is(err, mysql.ErrDBConflict):
+			return patient.ErrConflict
+		default:
+			return err
+		}
 	}
+
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		return err
 	}
+
 	if rowsAffected < 1 {
 		return patient.ErrNotFound
 	}
+
 	return nil
 }
