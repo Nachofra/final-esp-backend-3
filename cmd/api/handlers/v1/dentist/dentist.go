@@ -200,7 +200,7 @@ func (h *Handler) Delete() gin.HandlerFunc {
 // @Success 200 {object} web.response
 // @Failure 400 {object} web.errorResponse
 // @Failure 500 {object} web.errorResponse
-// @Router /dentist [patch]
+// @Router /dentist/:id [patch]
 func (h *Handler) Patch() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 

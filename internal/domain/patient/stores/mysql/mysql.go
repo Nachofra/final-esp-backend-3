@@ -3,7 +3,6 @@ package patient
 import (
 	"context"
 	"database/sql"
-
 	"github.com/Nachofra/final-esp-backend-3/internal/domain/patient"
 )
 

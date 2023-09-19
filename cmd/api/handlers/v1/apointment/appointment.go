@@ -201,8 +201,8 @@ func (h *Handler) Update() gin.HandlerFunc {
 func (h *Handler) PatchUpdate() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 
-		var request appointment.Appointment
 		var pa appointment.PatchAppointment
+		var app appointment.Appointment
 
 		errBind := ctx.ShouldBindJSON(&pa)
 		if errBind != nil {
@@ -211,16 +211,19 @@ func (h *Handler) PatchUpdate() gin.HandlerFunc {
 		}
 
 		id := ctx.Param("id")
-
 		idInt, err := strconv.Atoi(id)
 		if err != nil {
 			web.Error(ctx, http.StatusBadRequest, "%s", ErrInvalidID)
 			return
 		}
 
-		request, _ = h.service.GetByID(ctx, idInt)
+		app, err = h.service.GetByID(ctx, idInt)
+		if err != nil {
+			web.Error(ctx, http.StatusUnprocessableEntity, "%s", err)
+			return
+		}
 
-		app, err := h.service.Patch(ctx, request, pa)
+		a, err := h.service.Patch(ctx, app, pa)
 		if err != nil {
 			switch {
 			case errors.Is(err, appointment.ErrConflict):
@@ -234,7 +237,7 @@ func (h *Handler) PatchUpdate() gin.HandlerFunc {
 				return
 			}
 		}
-		web.Success(ctx, http.StatusOK, app)
+		web.Success(ctx, http.StatusOK, a)
 	}
 }
 
@@ -285,7 +288,6 @@ func (h *Handler) Delete() gin.HandlerFunc {
 // @Failure 500 {object} web.errorResponse
 // @Router /appointment/dni [post]
 func (h *Handler) CreateByDNI() gin.HandlerFunc {
-	// TODO crear metodo para crear turno con dni de paciente
 	return func(ctx *gin.Context) {
 
 		type NewCreate struct {

@@ -1,3 +1,4 @@
+basePath: /v1
 definitions:
   web.errorResponse:
     properties:
@@ -12,6 +13,9 @@ definitions:
     type: object
 info:
   contact: {}
+  description: This API handles patients, appointments and dentists.
+  title: Final Backend Specialization 3
+  version: "1.0"
 paths:
   /appointment:
     get:
@@ -197,28 +201,6 @@ paths:
       summary: denist example
       tags:
       - dentist
-    patch:
-      consumes:
-      - application/json
-      description: Update dentist by id
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/web.response'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/web.errorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/web.errorResponse'
-      summary: dentist example
-      tags:
-      - dentist
     post:
       consumes:
       - application/json
@@ -280,6 +262,28 @@ paths:
         name: id
         required: true
         type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/web.response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+      summary: dentist example
+      tags:
+      - dentist
+    patch:
+      consumes:
+      - application/json
+      description: Update dentist by id
       produces:
       - application/json
       responses:

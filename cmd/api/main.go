@@ -12,6 +12,10 @@ import (
 	"os"
 )
 
+// @title Final Backend Specialization 3
+// @version 1.0
+// @description This API handles patients, appointments and dentists.
+// @BasePath /v1
 func main() {
 	cfg, err := config.Get()
 	if err != nil {
