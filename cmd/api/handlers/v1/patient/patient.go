@@ -180,6 +180,18 @@ func (h *Handler) Update() gin.HandlerFunc {
 			return
 		}
 
+		_, err = h.service.GetByID(ctx, idInt)
+		if err != nil {
+			switch {
+			case errors.Is(err, patient.ErrNotFound):
+				web.Error(ctx, http.StatusNotFound, "%s", err)
+				return
+			default:
+				web.Error(ctx, http.StatusInternalServerError, "%s", ErrInternalServer)
+				return
+			}
+		}
+
 		p, err := h.service.Update(ctx, request, idInt)
 		if err != nil {
 			switch {

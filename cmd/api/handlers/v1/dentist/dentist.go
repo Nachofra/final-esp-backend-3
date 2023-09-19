@@ -181,6 +181,18 @@ func (h *Handler) Update() gin.HandlerFunc {
 			return
 		}
 
+		_, err = h.service.GetByID(ctx, idInt)
+		if err != nil {
+			switch {
+			case errors.Is(err, dentist.ErrNotFound):
+				web.Error(ctx, http.StatusNotFound, "%s", err)
+				return
+			default:
+				web.Error(ctx, http.StatusInternalServerError, "%s", ErrInternalServer)
+				return
+			}
+		}
+
 		d, err := h.service.Update(ctx, request, idInt)
 		if err != nil {
 			switch {
