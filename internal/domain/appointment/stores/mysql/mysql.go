@@ -6,6 +6,7 @@ import (
 	"errors"
 	"github.com/Nachofra/final-esp-backend-3/internal/domain/appointment"
 	"github.com/Nachofra/final-esp-backend-3/pkg/mysql"
+	"log"
 )
 
 // Store wraps all the operations to the database.
@@ -32,7 +33,7 @@ func (s *Store) GetAll(_ context.Context, filters map[string]string) []appointme
 	defer func(rows *sql.Rows) {
 		err = rows.Close()
 		if err != nil {
-			panic("IMPLEMENT LOGGER")
+			log.Println(err)
 		}
 	}(rows)
 
@@ -54,17 +55,11 @@ func (s *Store) GetAll(_ context.Context, filters map[string]string) []appointme
 
 // GetByID returns an appointment by its ID.
 func (s *Store) GetByID(_ context.Context, ID int) (appointment.Appointment, error) {
-	stmt, err := s.db.Prepare(QueryGetAppointmentByID)
-	if err != nil {
-		// TODO: implement log
-		return appointment.Appointment{}, err
-	}
-
-	row := stmt.QueryRow(ID)
+	row := s.db.QueryRow(QueryGetAppointmentByID, ID)
 
 	var a appointment.Appointment
 
-	err = row.Scan(&a.ID, &a.PatientID, &a.DentistID, &a.Date.Time, &a.Description)
+	err := row.Scan(&a.ID, &a.PatientID, &a.DentistID, &a.Date.Time, &a.Description)
 	if err != nil {
 		err := mysql.CheckError(err)
 		switch {
@@ -88,7 +83,7 @@ func (s *Store) Create(_ context.Context, a appointment.Appointment) (appointmen
 	defer func(statement *sql.Stmt) {
 		err := statement.Close()
 		if err != nil {
-			panic("IMPLEMENT LOGGER")
+			log.Println(err)
 		}
 	}(statement)
 
@@ -127,7 +122,7 @@ func (s *Store) Update(_ context.Context, a appointment.Appointment) (appointmen
 	defer func(statement *sql.Stmt) {
 		err := statement.Close()
 		if err != nil {
-			panic("IMPLEMENT LOGGER")
+			log.Println(err)
 		}
 	}(statement)
 
