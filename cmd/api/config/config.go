@@ -6,12 +6,14 @@ import (
 )
 
 const (
-	host     = "0.0.0.0"
-	port     = "3307"
-	user     = "root"
-	password = "root"
-	schema   = "clinic"
-	charset  = "utf8"
+	host         = "localhost"
+	port         = "8080"
+	databaseHost = "localhost"
+	databasePort = "3307"
+	user         = "root"
+	password     = "root"
+	schema       = "clinic"
+	charset      = "utf8"
 )
 
 // Config centralizes all the config of dependencies of the whole app.
@@ -24,6 +26,8 @@ type Config struct {
 	DBCharset   string `env:"DATABASE_CHARSET"`
 	DBParseTime bool   `env:"DATABASE_PARSE_TIME" envDefault:"true"`
 
+	Host    string `env:"HOST"`
+	Port    string `env:"PORT"`
 	GinMode string `env:"GIN_MODE" envDefault:"debug"`
 }
 
@@ -43,12 +47,15 @@ func Get() (*Config, error) {
 
 // loadDefaults puts default values in the configuration if some environment variables are not set.
 func loadDefaults(cfg *Config) {
-	cfg.DBHost = defaultValue(cfg.DBHost, host)
-	cfg.DBPort = defaultValue(cfg.DBPort, port)
+	cfg.DBHost = defaultValue(cfg.DBHost, databaseHost)
+	cfg.DBPort = defaultValue(cfg.DBPort, databasePort)
 	cfg.DBUser = defaultValue(cfg.DBUser, user)
 	cfg.DBPassword = defaultValue(cfg.DBPassword, password)
 	cfg.DBSchema = defaultValue(cfg.DBSchema, schema)
 	cfg.DBCharset = defaultValue(cfg.DBCharset, charset)
+
+	cfg.Host = defaultValue(cfg.Host, host)
+	cfg.Port = defaultValue(cfg.Port, port)
 }
 
 // defaultValue returns the value of v if it's not empty, otherwise returns the default value.

@@ -82,7 +82,7 @@ func (h *Handler) GetAll() gin.HandlerFunc {
 // Patient godoc
 // @Summary patient example
 // @Description Get patient by id
-// @Tags dentist
+// @Tags patient
 // @Param id path int true "patient id"
 // @Accept json
 // @Produce json
@@ -113,7 +113,7 @@ func (h *Handler) GetByID() gin.HandlerFunc {
 // Patient godoc
 // @Summary patient example
 // @Description Update patient by id
-// @Tags dentist
+// @Tags patient
 // @Accept json
 // @Produce json
 // @Success 200 {object} web.response
@@ -155,7 +155,7 @@ func (h *Handler) Update() gin.HandlerFunc {
 // Patient godoc
 // @Summary patient example
 // @Description Update patient by id
-// @Tags dentist
+// @Tags patient
 // @Accept json
 // @Produce json
 // @Success 200 {object} web.response

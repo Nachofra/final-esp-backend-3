@@ -46,6 +46,10 @@ DATABASE_PARSE_TIME=true
 
 # Gin configuration (execution mode)
 GIN_MODE=debug
+
+# Custom host and port for your application
+HOST=localhost               # Change this to your desired host
+PORT=8080                     # Change this to your desired port
 ```
 
 ### Important:

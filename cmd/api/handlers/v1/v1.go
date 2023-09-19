@@ -2,9 +2,11 @@ package v1
 
 import (
 	"database/sql"
+	"github.com/Nachofra/final-esp-backend-3/cmd/api/config"
 	handlerAppointment "github.com/Nachofra/final-esp-backend-3/cmd/api/handlers/v1/apointment"
 	handlerDentist "github.com/Nachofra/final-esp-backend-3/cmd/api/handlers/v1/dentist"
 	handlerPatient "github.com/Nachofra/final-esp-backend-3/cmd/api/handlers/v1/patient"
+	"github.com/Nachofra/final-esp-backend-3/docs"
 	"github.com/Nachofra/final-esp-backend-3/internal/domain/appointment"
 	mysqlAppointment "github.com/Nachofra/final-esp-backend-3/internal/domain/appointment/stores/mysql"
 	"github.com/Nachofra/final-esp-backend-3/internal/domain/dentist"
@@ -14,6 +16,8 @@ import (
 	"github.com/Nachofra/final-esp-backend-3/pkg/middleware"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"log"
 )
 
@@ -22,6 +26,7 @@ type Config struct {
 	Log       *log.Logger
 	DB        *sql.DB
 	Validator *validator.Validate
+	Env       *config.Config
 }
 
 // Routes sets all the version 1 routes.
@@ -74,4 +79,6 @@ func Routes(eng *gin.Engine, cfg Config) {
 		a.DELETE("/:id", middleware.Authenticate(), appointmentHandler.Delete())
 	}
 
+	docs.SwaggerInfo.Host = cfg.Env.Host + ":" + cfg.Env.Port
+	v1.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 }

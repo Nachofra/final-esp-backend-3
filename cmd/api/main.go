@@ -42,9 +42,10 @@ func main() {
 		Log:       logger,
 		DB:        database,
 		Validator: v,
+		Env:       cfg,
 	})
 
-	err = eng.Run()
+	err = eng.Run(cfg.Host + ":" + cfg.Port)
 	if err != nil {
 		panic(err)
 	}
