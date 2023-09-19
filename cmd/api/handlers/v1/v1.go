@@ -66,7 +66,7 @@ func Routes(eng *gin.Engine, cfg Config) {
 	a := v1.Group("/appointment")
 	{
 		a.GET("/:id", appointmentHandler.GetByID())
-		a.GET("/", appointmentHandler.GetByDNI())
+		a.GET("/", appointmentHandler.GetAll())
 		a.POST("/", middleware.Authenticate(), appointmentHandler.Create())
 		a.POST("/dni", middleware.Authenticate(), appointmentHandler.CreateByDNI())
 		a.PUT("/:id", middleware.Authenticate(), appointmentHandler.Update())

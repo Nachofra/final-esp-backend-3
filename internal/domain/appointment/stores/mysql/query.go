@@ -3,7 +3,7 @@ package mysql
 import "github.com/Nachofra/final-esp-backend-3/pkg/query_builder"
 
 const (
-	QueryGetAllAppointment = `SELECT a.id, a.patient_id, a.dentist_id, a.date, a.description, p.dni
+	QueryGetAllAppointment = `SELECT a.id, a.patient_id, a.dentist_id, a.date, a.description
 	FROM clinic.appointment a INNER JOIN clinic.patient p on a.patient_id = p.id`
 
 	QueryGetAppointmentByID = `SELECT id, patient_id, dentist_id, date, description

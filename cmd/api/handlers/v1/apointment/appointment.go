@@ -85,7 +85,7 @@ func (h *Handler) Create() gin.HandlerFunc {
 // @Success 200 {object} web.response
 // @Failure 500 {object} web.errorResponse
 // @Router /appointment [get]
-func (h *Handler) GetByDNI() gin.HandlerFunc {
+func (h *Handler) GetAll() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		dni, err := strconv.Atoi(ctx.Query("dni"))
 		if err != nil {
@@ -93,7 +93,7 @@ func (h *Handler) GetByDNI() gin.HandlerFunc {
 			return
 		}
 
-		appointments := h.service.GetAll(ctx, appointment.FilterAppointment{DNI: dni})
+		appointments := h.service.GetAll(ctx, appointment.FilterAppointment{DNI: &dni})
 
 		web.Success(ctx, http.StatusOK, appointments)
 	}
