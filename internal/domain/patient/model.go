@@ -17,7 +17,7 @@ type NewPatient struct {
 	FirstName     string           `json:"first_name"     validate:"required"`
 	LastName      string           `json:"last_name"      validate:"required"`
 	Address       string           `json:"address"        validate:"required"`
-	DNI           int              `json:"dni"            validate:"required,min=10000000,max=99999999"`
+	DNI           int              `json:"dni"            validate:"required,min=100000,max=99999999"`
 	DischargeDate custom_time.Time `json:"discharge_date" validate:"required"`
 }
 
@@ -26,6 +26,6 @@ type PatchPatient struct {
 	FirstName     *string           `json:"first_name"`
 	LastName      *string           `json:"last_name"`
 	Address       *string           `json:"address"`
-	DNI           *int              `json:"dni" validate:"omitempty,min=10000000,max=99999999"`
+	DNI           *int              `json:"dni" validate:"omitempty,min=100000,max=99999999"`
 	DischargeDate *custom_time.Time `json:"discharge_date"`
 }

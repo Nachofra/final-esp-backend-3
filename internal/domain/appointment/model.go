@@ -43,7 +43,7 @@ type PatchAppointment struct {
 type FilterAppointment struct {
 	PatientID *int              `form:"patient_id"`
 	DentistID *int              `form:"dentist_id"`
-	DNI       *int              `form:"dni" validate:"omitempty,min=10000000,max=99999999"`
+	DNI       *int              `form:"dni" validate:"omitempty,min=100000,max=99999999"`
 	FromDate  *custom_time.Time `form:"from_date"`
 	ToDate    *custom_time.Time `form:"to_date"`
 }
