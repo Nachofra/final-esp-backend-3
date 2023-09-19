@@ -126,7 +126,7 @@ func (s *Store) Update(_ context.Context, a appointment.Appointment) (appointmen
 		}
 	}(statement)
 
-	result, err := statement.Exec(a.PatientID, a.DentistID, a.Date.Time, a.Description, a.ID)
+	_, err = statement.Exec(a.PatientID, a.DentistID, a.Date.Time, a.Description, a.ID)
 	if err != nil {
 		err := mysql.CheckError(err)
 		switch {
@@ -141,15 +141,6 @@ func (s *Store) Update(_ context.Context, a appointment.Appointment) (appointmen
 		}
 	}
 
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return appointment.Appointment{}, err
-	}
-
-	if rowsAffected < 1 {
-		return appointment.Appointment{}, appointment.ErrNotFound
-	}
-
 	return a, nil
 }
 
@@ -159,6 +150,8 @@ func (s *Store) Delete(_ context.Context, ID int) error {
 	if err != nil {
 		err := mysql.CheckError(err)
 		switch {
+		case errors.Is(err, mysql.ErrDBNoRows):
+			return appointment.ErrNotFound
 		case errors.Is(err, mysql.ErrDBConflict):
 			return appointment.ErrConflict
 		default:

@@ -312,6 +312,9 @@ func (h *Handler) Delete() gin.HandlerFunc {
 		err = h.service.Delete(ctx, id)
 		if err != nil {
 			switch {
+			case errors.Is(err, appointment.ErrNotFound):
+				web.Error(ctx, http.StatusNotFound, "%s", err)
+				return
 			case errors.Is(err, appointment.ErrConflict):
 				web.Error(ctx, http.StatusConflict, "%s", err)
 				return

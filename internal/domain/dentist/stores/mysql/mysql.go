@@ -183,7 +183,7 @@ func (s *Store) Update(_ context.Context, d dentist.Dentist) (dentist.Dentist, e
 		}
 	}(statement)
 
-	result, err := statement.Exec(
+	_, err = statement.Exec(
 		d.FirstName,
 		d.LastName,
 		d.RegistrationNumber,
@@ -203,15 +203,6 @@ func (s *Store) Update(_ context.Context, d dentist.Dentist) (dentist.Dentist, e
 		}
 	}
 
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return dentist.Dentist{}, err
-	}
-
-	if rowsAffected < 1 {
-		return dentist.Dentist{}, dentist.ErrNotFound
-	}
-
 	return d, nil
 }
 
@@ -221,6 +212,8 @@ func (s *Store) Delete(_ context.Context, id int) error {
 	if err != nil {
 		err := mysql.CheckError(err)
 		switch {
+		case errors.Is(err, mysql.ErrDBNoRows):
+			return dentist.ErrNotFound
 		case errors.Is(err, mysql.ErrDBConflict):
 			return dentist.ErrConflict
 		default:
