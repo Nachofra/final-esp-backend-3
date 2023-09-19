@@ -3,32 +3,34 @@ package dentist
 import (
 	"context"
 	"errors"
-	"log"
 )
 
 var (
-	ErrNotFound  = errors.New("dentist not found")
-	ErrStatement = errors.New("error preparing statement")
-	ErrExec      = errors.New("error executing statement")
-	ErrLastId    = errors.New("error getting last id")
+	ErrNotFound      = errors.New("dentist not found")
+	ErrConflict      = errors.New("constraint conflict while storing")
+	ErrAlreadyExists = errors.New("dentist already exists")
+	ErrValueExceeded = errors.New("attribute value exceed type limit")
 )
 
+// Store specifies the contract needed for the Store in the Service.
 type Store interface {
 	Create(ctx context.Context, dentist Dentist) (Dentist, error)
-	GetAll(ctx context.Context) ([]Dentist, error)
+	GetAll(ctx context.Context) []Dentist
 	GetByID(ctx context.Context, id int) (Dentist, error)
 	GetByRegistrationNumber(ctx context.Context, rn int) (Dentist, error)
 	Update(ctx context.Context, dentist Dentist) (Dentist, error)
 	Delete(ctx context.Context, id int) error
 }
 
+// service unifies all the business operation for the domain.
 type service struct {
 	store Store
 }
 
+// Service specifies the contract needed for the Service.
 type Service interface {
 	Create(ctx context.Context, newDentist NewDentist) (Dentist, error)
-	GetAll(ctx context.Context) ([]Dentist, error)
+	GetAll(ctx context.Context) []Dentist
 	GetByID(ctx context.Context, id int) (Dentist, error)
 	GetByRegistrationNumber(ctx context.Context, rn int) (Dentist, error)
 	Update(ctx context.Context, updateDentist UpdateDentist, id int) (Dentist, error)
@@ -39,7 +41,6 @@ type Service interface {
 // NewService creates a new product service.
 func NewService(store Store) Service {
 	return &service{
-		//Here we put the repository
 		store: store,
 	}
 }
@@ -49,30 +50,23 @@ func (s *service) Create(ctx context.Context, newDentist NewDentist) (Dentist, e
 	dentist := newToDentist(newDentist)
 	response, err := s.store.Create(ctx, dentist)
 	if err != nil {
-		log.Println("error en servicio. Metodo create")
-		return Dentist{}, errors.New("error en servicio. Metodo create")
+		return Dentist{}, err
 	}
 
 	return response, nil
 }
 
 // GetAll returns all products.
-func (s *service) GetAll(ctx context.Context) ([]Dentist, error) {
-	dentists, err := s.store.GetAll(ctx)
-	if err != nil {
-		log.Println("error getting dentists on service layer", err.Error())
-		return []Dentist{}, errors.New("service error. Method GetAll")
-	}
-
-	return dentists, nil
+func (s *service) GetAll(ctx context.Context) []Dentist {
+	dentists := s.store.GetAll(ctx)
+	return dentists
 }
 
 // GetByID returns a product by its ID.
 func (s *service) GetByID(ctx context.Context, id int) (Dentist, error) {
 	dentist, err := s.store.GetByID(ctx, id)
 	if err != nil {
-		log.Println("error getting dentist on service layer", err.Error())
-		return Dentist{}, errors.New("service error. Method GetByID")
+		return Dentist{}, err
 	}
 
 	return dentist, nil
@@ -82,8 +76,7 @@ func (s *service) GetByID(ctx context.Context, id int) (Dentist, error) {
 func (s *service) GetByRegistrationNumber(ctx context.Context, dni int) (Dentist, error) {
 	dentist, err := s.store.GetByRegistrationNumber(ctx, dni)
 	if err != nil {
-		log.Println("error getting patient on service layer", err.Error())
-		return Dentist{}, errors.New("service error. Method GetByRegistrationNumber")
+		return Dentist{}, err
 	}
 
 	return dentist, nil
@@ -95,8 +88,7 @@ func (s *service) Update(ctx context.Context, updateDentist UpdateDentist, id in
 	dentist.ID = id
 	response, err := s.store.Update(ctx, dentist)
 	if err != nil {
-		log.Println("error updating dentist on service layer", err.Error())
-		return Dentist{}, errors.New("service error. Method Update")
+		return Dentist{}, err
 	}
 
 	return response, nil
@@ -106,8 +98,7 @@ func (s *service) Update(ctx context.Context, updateDentist UpdateDentist, id in
 func (s *service) Delete(ctx context.Context, id int) error {
 	err := s.store.Delete(ctx, id)
 	if err != nil {
-		log.Println("error deleting dentist on service layer", err.Error())
-		return errors.New("service error. Method Delete")
+		return err
 	}
 
 	return nil
@@ -115,7 +106,6 @@ func (s *service) Delete(ctx context.Context, id int) error {
 
 // Patch patches an appointment.
 func (s *service) Patch(ctx context.Context, dentist Dentist, nd NewDentist) (Dentist, error) {
-
 	if nd.FirstName != "" {
 		dentist.FirstName = nd.FirstName
 	}
@@ -136,6 +126,7 @@ func (s *service) Patch(ctx context.Context, dentist Dentist, nd NewDentist) (De
 	return d, nil
 }
 
+// newToDentist parses NewDentist to Dentist
 func newToDentist(newDentist NewDentist) Dentist {
 	var dentist Dentist
 	dentist.FirstName = newDentist.FirstName
@@ -145,6 +136,7 @@ func newToDentist(newDentist NewDentist) Dentist {
 	return dentist
 }
 
+// updateToDentist parses UpdateDentist to Dentist
 func updateToDentist(updateDentist UpdateDentist) Dentist {
 	var dentist Dentist
 	dentist.FirstName = updateDentist.FirstName

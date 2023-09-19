@@ -11,25 +11,21 @@ import (
 )
 
 var (
-	ErrInvalidID           = errors.New("invalid ID")
-	ErrInternalServer      = errors.New("internal server error")
-	ErrUnprocessableEntity = errors.New("unprocessable entity: the JSON provided does not conform to the expected entity structure, please review it and try again")
+	ErrInvalidID      = errors.New("invalid ID")
+	ErrInternalServer = errors.New("internal server error")
 )
 
-// Here we will implement dentist handlers
-
 type Handler struct {
-	// Here we put the service
 	service dentist.Service
 }
 
 func NewHandler(service dentist.Service) *Handler {
 	return &Handler{
-		// Receive service via method param
 		service: service,
 	}
 }
 
+// Create is the handler in charge of the dentist creation flow.
 // Dentist godoc
 // @Summary dentist example
 // @Description Create a new dentist
@@ -45,27 +41,37 @@ func (h *Handler) Create() gin.HandlerFunc {
 
 		var request dentist.NewDentist
 
-		err := ctx.Bind(&request)
+		err := ctx.ShouldBindJSON(&request)
 		if err != nil {
-			web.Error(ctx, http.StatusBadRequest, "%s", err)
+			web.Error(ctx, http.StatusUnprocessableEntity, "%s", err)
 			return
 		}
 
-		dentist, err := h.service.Create(ctx, request)
+		d, err := h.service.Create(ctx, request)
 		if err != nil {
-			web.Error(ctx, http.StatusInternalServerError, "%s", "internal server error")
-			return
+			switch {
+			case errors.Is(err, dentist.ErrAlreadyExists):
+				web.Error(ctx, http.StatusConflict, "%s", err)
+				return
+			case errors.Is(err, dentist.ErrConflict):
+				web.Error(ctx, http.StatusConflict, "%s", err)
+				return
+			case errors.Is(err, dentist.ErrValueExceeded):
+				web.Error(ctx, http.StatusUnprocessableEntity, "%s", err)
+				return
+			default:
+				web.Error(ctx, http.StatusInternalServerError, "%s", ErrInternalServer)
+				return
+			}
 		}
 
-		web.Success(ctx, http.StatusOK, gin.H{
-			"data": dentist,
-		})
-
+		web.Success(ctx, http.StatusCreated, d)
 	}
 }
 
+// GetAll is the handler in charge of dentist querying flow.
 // Dentist godoc
-// @Summary denist example
+// @Summary dentist example
 // @Description Get all dentists
 // @Tags dentist
 // @Accept json
@@ -75,18 +81,13 @@ func (h *Handler) Create() gin.HandlerFunc {
 // @Router /dentist [get]
 func (h *Handler) GetAll() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		dentist, err := h.service.GetAll(ctx)
-		if err != nil {
-			web.Error(ctx, http.StatusInternalServerError, "%s", "internal server error")
-			return
-		}
+		d := h.service.GetAll(ctx)
 
-		web.Success(ctx, http.StatusOK, gin.H{
-			"data": dentist,
-		})
+		web.Success(ctx, http.StatusOK, d)
 	}
 }
 
+// GetByID is the handler in charge of querying dentists by ID.
 // Dentist godoc
 // @Summary dentist example
 // @Description Get dentist by id
@@ -102,22 +103,27 @@ func (h *Handler) GetByID() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id, err := strconv.Atoi(ctx.Param("id"))
 		if err != nil {
-			web.Error(ctx, http.StatusBadRequest, "%s", "id invalido")
+			web.Error(ctx, http.StatusBadRequest, "%s", ErrInvalidID)
 			return
 		}
 
-		dentist, err := h.service.GetByID(ctx, id)
+		d, err := h.service.GetByID(ctx, id)
 		if err != nil {
-			web.Error(ctx, http.StatusInternalServerError, "%s", "internal server error")
-			return
+			switch {
+			case errors.Is(err, dentist.ErrNotFound):
+				web.Error(ctx, http.StatusNotFound, "%s", err)
+				return
+			default:
+				web.Error(ctx, http.StatusInternalServerError, "%s", ErrInternalServer)
+				return
+			}
 		}
 
-		web.Success(ctx, http.StatusOK, gin.H{
-			"data": dentist,
-		})
+		web.Success(ctx, http.StatusOK, d)
 	}
 }
 
+// Update is the handler in charge of dentist updating flow.
 // Dentist godoc
 // @Summary dentist example
 // @Description Update dentist by id
@@ -133,9 +139,9 @@ func (h *Handler) Update() gin.HandlerFunc {
 
 		var request dentist.UpdateDentist
 
-		errBind := ctx.Bind(&request)
+		errBind := ctx.ShouldBindJSON(&request)
 		if errBind != nil {
-			web.Error(ctx, http.StatusBadRequest, "%s", errBind)
+			web.Error(ctx, http.StatusUnprocessableEntity, "%s", errBind)
 			return
 		}
 
@@ -143,23 +149,30 @@ func (h *Handler) Update() gin.HandlerFunc {
 
 		idInt, err := strconv.Atoi(id)
 		if err != nil {
-			web.Error(ctx, http.StatusBadRequest, "%s", "bad request param")
+			web.Error(ctx, http.StatusBadRequest, "%s", ErrInvalidID)
 			return
 		}
 
-		dentist, err := h.service.Update(ctx, request, idInt)
+		d, err := h.service.Update(ctx, request, idInt)
 		if err != nil {
-			web.Error(ctx, http.StatusInternalServerError, "%s", "internal server error")
-			return
+			switch {
+			case errors.Is(err, dentist.ErrConflict):
+				web.Error(ctx, http.StatusConflict, "%s", err)
+				return
+			case errors.Is(err, dentist.ErrValueExceeded):
+				web.Error(ctx, http.StatusUnprocessableEntity, "%s", err)
+				return
+			default:
+				web.Error(ctx, http.StatusInternalServerError, "%s", ErrInternalServer)
+				return
+			}
 		}
 
-		web.Success(ctx, http.StatusOK, gin.H{
-			"data": dentist,
-		})
-
+		web.Success(ctx, http.StatusOK, d)
 	}
 }
 
+// Delete is the handler in charge of dentist deleting flow.
 // Dentist godoc
 // @Summary dentist example
 // @Description Delete dentist by id
@@ -175,22 +188,27 @@ func (h *Handler) Delete() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id, err := strconv.Atoi(ctx.Param("id"))
 		if err != nil {
-			web.Error(ctx, http.StatusBadRequest, "%s", "invalid id")
+			web.Error(ctx, http.StatusBadRequest, "%s", ErrInvalidID)
 			return
 		}
 
 		err = h.service.Delete(ctx, id)
 		if err != nil {
-			web.Error(ctx, http.StatusInternalServerError, "%s", "internal server error")
-			return
+			switch {
+			case errors.Is(err, dentist.ErrConflict):
+				web.Error(ctx, http.StatusConflict, "%s", err)
+				return
+			default:
+				web.Error(ctx, http.StatusInternalServerError, "%s", ErrInternalServer)
+				return
+			}
 		}
 
-		web.Success(ctx, http.StatusOK, gin.H{
-			"mensaje": "dentist deleted",
-		})
+		web.Success(ctx, http.StatusNoContent, nil)
 	}
 }
 
+// Patch is the handler in charge of appointment patching flow.
 // Dentist godoc
 // @Summary dentist example
 // @Description Update dentist by id
@@ -207,34 +225,46 @@ func (h *Handler) Patch() gin.HandlerFunc {
 		var de dentist.Dentist
 		var nd dentist.NewDentist
 
-		errBind := ctx.ShouldBind(&nd)
+		errBind := ctx.ShouldBindJSON(&nd)
 		if errBind != nil {
-			web.Error(ctx, http.StatusBadRequest, "%s", errBind)
+			web.Error(ctx, http.StatusUnprocessableEntity, "%s", errBind)
 			return
 		}
 
 		id := ctx.Param("id")
 		idInt, err := strconv.Atoi(id)
 		if err != nil {
-			web.Error(ctx, http.StatusBadRequest, "%s", "bad request param")
+			web.Error(ctx, http.StatusBadRequest, "%s", ErrInvalidID)
 			return
 		}
 
 		de, err = h.service.GetByID(ctx, idInt)
 		if err != nil {
-			web.Error(ctx, http.StatusBadRequest, "%s", "bad request param")
-			return
+			switch {
+			case errors.Is(err, dentist.ErrNotFound):
+				web.Error(ctx, http.StatusNotFound, "%s", err)
+				return
+			default:
+				web.Error(ctx, http.StatusInternalServerError, "%s", ErrInternalServer)
+				return
+			}
 		}
 
-		dentist, err := h.service.Patch(ctx, de, nd)
+		d, err := h.service.Patch(ctx, de, nd)
 		if err != nil {
-			web.Error(ctx, http.StatusInternalServerError, "%s", "internal server error")
-			return
+			switch {
+			case errors.Is(err, dentist.ErrConflict):
+				web.Error(ctx, http.StatusConflict, "%s", err)
+				return
+			case errors.Is(err, dentist.ErrValueExceeded):
+				web.Error(ctx, http.StatusUnprocessableEntity, "%s", err)
+				return
+			default:
+				web.Error(ctx, http.StatusInternalServerError, "%s", ErrInternalServer)
+				return
+			}
 		}
 
-		web.Success(ctx, http.StatusOK, gin.H{
-			"data": dentist,
-		})
-
+		web.Success(ctx, http.StatusOK, d)
 	}
 }

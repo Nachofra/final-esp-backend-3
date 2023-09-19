@@ -3,6 +3,9 @@ package mysql
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"github.com/Nachofra/final-esp-backend-3/pkg/mysql"
+	"log"
 
 	"github.com/Nachofra/final-esp-backend-3/internal/domain/dentist"
 )
@@ -38,17 +41,16 @@ func New(db *sql.DB) *Store {
 }
 
 // GetAll returns all dentists.
-func (s *Store) GetAll(_ context.Context) ([]dentist.Dentist, error) {
+func (s *Store) GetAll(_ context.Context) []dentist.Dentist {
 	rows, err := s.db.Query(QueryGetAllDentist)
 	if err != nil {
-		return []dentist.Dentist{}, err
+		return []dentist.Dentist{}
 	}
 
 	defer func(rows *sql.Rows) {
 		err := rows.Close()
 		if err != nil {
-			//TODO que hago aca?
-			panic("IMPLEMENT LOGGER")
+			log.Println(err)
 		}
 	}(rows)
 
@@ -64,22 +66,22 @@ func (s *Store) GetAll(_ context.Context) ([]dentist.Dentist, error) {
 			&d.RegistrationNumber,
 		)
 		if err != nil {
-			return []dentist.Dentist{}, err
+			return []dentist.Dentist{}
 		}
 
 		dentistsList = append(dentistsList, d)
 	}
 
 	if err := rows.Err(); err != nil {
-		return []dentist.Dentist{}, err
+		return []dentist.Dentist{}
 	}
 
-	return dentistsList, nil
+	return dentistsList
 }
 
 // GetByID returns a dentist by its ID.
-func (s *Store) GetByID(_ context.Context, id int) (dentist.Dentist, error) {
-	row := s.db.QueryRow(QueryGetDentistById, id)
+func (s *Store) GetByID(_ context.Context, ID int) (dentist.Dentist, error) {
+	row := s.db.QueryRow(QueryGetDentistById, ID)
 
 	var d dentist.Dentist
 
@@ -90,7 +92,13 @@ func (s *Store) GetByID(_ context.Context, id int) (dentist.Dentist, error) {
 		&d.RegistrationNumber,
 	)
 	if err != nil {
-		return dentist.Dentist{}, err
+		err := mysql.CheckError(err)
+		switch {
+		case errors.Is(err, mysql.ErrDBNoRows):
+			return dentist.Dentist{}, dentist.ErrNotFound
+		default:
+			return dentist.Dentist{}, err
+		}
 	}
 
 	return d, nil
@@ -109,7 +117,13 @@ func (s *Store) GetByRegistrationNumber(_ context.Context, rn int) (dentist.Dent
 		&d.RegistrationNumber,
 	)
 	if err != nil {
-		return dentist.Dentist{}, err
+		err := mysql.CheckError(err)
+		switch {
+		case errors.Is(err, mysql.ErrDBNoRows):
+			return dentist.Dentist{}, dentist.ErrNotFound
+		default:
+			return dentist.Dentist{}, err
+		}
 	}
 
 	return d, nil
@@ -119,14 +133,13 @@ func (s *Store) GetByRegistrationNumber(_ context.Context, rn int) (dentist.Dent
 func (s *Store) Create(_ context.Context, d dentist.Dentist) (dentist.Dentist, error) {
 	statement, err := s.db.Prepare(QueryInsertDentist)
 	if err != nil {
-		return dentist.Dentist{}, dentist.ErrStatement
+		return dentist.Dentist{}, err
 	}
 
 	defer func(statement *sql.Stmt) {
 		err := statement.Close()
 		if err != nil {
-			//TODO que hago aca?
-			panic("IMPLEMENT LOGGER")
+			log.Println(err)
 		}
 	}(statement)
 
@@ -136,12 +149,22 @@ func (s *Store) Create(_ context.Context, d dentist.Dentist) (dentist.Dentist, e
 		d.RegistrationNumber,
 	)
 	if err != nil {
-		return dentist.Dentist{}, dentist.ErrExec
+		err := mysql.CheckError(err)
+		switch {
+		case errors.Is(err, mysql.ErrDBDuplicateEntry):
+			return dentist.Dentist{}, dentist.ErrAlreadyExists
+		case errors.Is(err, mysql.ErrDBConflict):
+			return dentist.Dentist{}, dentist.ErrConflict
+		case errors.Is(err, mysql.ErrDBValueExceeded):
+			return dentist.Dentist{}, dentist.ErrValueExceeded
+		default:
+			return dentist.Dentist{}, err
+		}
 	}
 
 	lastId, err := result.LastInsertId()
 	if err != nil {
-		return dentist.Dentist{}, dentist.ErrLastId
+		return dentist.Dentist{}, err
 	}
 
 	d.ID = int(lastId)
@@ -159,7 +182,7 @@ func (s *Store) Update(_ context.Context, d dentist.Dentist) (dentist.Dentist, e
 	defer func(statement *sql.Stmt) {
 		err := statement.Close()
 		if err != nil {
-			panic("IMPLEMENT LOGGER")
+			log.Println(err)
 		}
 	}(statement)
 
@@ -170,7 +193,15 @@ func (s *Store) Update(_ context.Context, d dentist.Dentist) (dentist.Dentist, e
 		d.ID,
 	)
 	if err != nil {
-		return dentist.Dentist{}, err
+		err := mysql.CheckError(err)
+		switch {
+		case errors.Is(err, mysql.ErrDBConflict):
+			return dentist.Dentist{}, dentist.ErrConflict
+		case errors.Is(err, mysql.ErrDBValueExceeded):
+			return dentist.Dentist{}, dentist.ErrValueExceeded
+		default:
+			return dentist.Dentist{}, err
+		}
 	}
 
 	rowsAffected, err := result.RowsAffected()
@@ -189,7 +220,13 @@ func (s *Store) Update(_ context.Context, d dentist.Dentist) (dentist.Dentist, e
 func (s *Store) Delete(_ context.Context, id int) error {
 	result, err := s.db.Exec(QueryDeleteDentist, id)
 	if err != nil {
-		return err
+		err := mysql.CheckError(err)
+		switch {
+		case errors.Is(err, mysql.ErrDBConflict):
+			return dentist.ErrConflict
+		default:
+			return err
+		}
 	}
 
 	rowsAffected, err := result.RowsAffected()
