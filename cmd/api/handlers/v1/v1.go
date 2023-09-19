@@ -58,7 +58,7 @@ func Routes(eng *gin.Engine, cfg Config) {
 		p.GET("/", patientHandler.GetAll())
 		p.POST("/", middleware.Authenticate(), patientHandler.Create())
 		p.PUT("/:id", middleware.Authenticate(), patientHandler.Update())
-		p.PATCH("/", middleware.Authenticate(), patientHandler.PatchUpdate())
+		p.PATCH("/:id", middleware.Authenticate(), patientHandler.PatchUpdate())
 		p.DELETE("/:id", middleware.Authenticate(), patientHandler.Delete())
 	}
 
@@ -68,9 +68,9 @@ func Routes(eng *gin.Engine, cfg Config) {
 		a.GET("/:id", appointmentHandler.GetByID())
 		a.GET("/", appointmentHandler.GetByDNI())
 		a.POST("/", middleware.Authenticate(), appointmentHandler.Create())
-		a.POST("/:id", middleware.Authenticate(), appointmentHandler.CreateByDNI())
+		a.POST("/dni", middleware.Authenticate(), appointmentHandler.CreateByDNI())
 		a.PUT("/:id", middleware.Authenticate(), appointmentHandler.Update())
-		a.PATCH("/", middleware.Authenticate(), appointmentHandler.PatchUpdate())
+		a.PATCH("/:id", middleware.Authenticate(), appointmentHandler.PatchUpdate())
 		a.DELETE("/:id", middleware.Authenticate(), appointmentHandler.Delete())
 	}
 

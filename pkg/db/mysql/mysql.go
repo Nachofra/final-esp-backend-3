@@ -8,16 +8,22 @@ import (
 
 // Config centralizes the parameters required to construct the MySQL database URL.
 type Config struct {
-	username string
-	password string
-	host     string
-	name     string
+	username  string
+	password  string
+	host      string
+	name      string
+	charset   string
+	parseTime bool
 }
 
 // New creates a new MySQL configuration by applying all the provided options to it.
 // You can pass a series of options as variadic arguments to customize the configuration.
 func New(options ...func(*Config)) *Config {
 	db := &Config{}
+
+	// Setting default charset
+	db.charset = "utf8"
+
 	for _, o := range options {
 		o(db)
 	}
@@ -41,7 +47,7 @@ func (cfg *Config) start() (*sql.DB, error) {
 
 // getConnectionString generates the MySQL connection string based on the current configuration.
 func (cfg *Config) getConnectionString() string {
-	return fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8", cfg.username, cfg.password, cfg.host, cfg.name)
+	return fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=%s&parseTime=%t", cfg.username, cfg.password, cfg.host, cfg.name, cfg.charset, cfg.parseTime)
 }
 
 // WithUsername is used to set database username in the config.
@@ -69,5 +75,19 @@ func WithHost(host string) func(*Config) {
 func WithName(name string) func(*Config) {
 	return func(db *Config) {
 		db.name = name
+	}
+}
+
+// WithCharset sets charset in the database URL param.
+func WithCharset(charset string) func(*Config) {
+	return func(db *Config) {
+		db.charset = charset
+	}
+}
+
+// WithParseTime sets parseTime in the database URL param.
+func WithParseTime(parseTime bool) func(*Config) {
+	return func(db *Config) {
+		db.parseTime = parseTime
 	}
 }

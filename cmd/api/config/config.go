@@ -11,15 +11,18 @@ const (
 	user     = "root"
 	password = "root"
 	schema   = "clinic"
+	charset  = "utf8"
 )
 
 // Config centralizes all the config of dependencies of the whole app.
 type Config struct {
-	DBHost     string `env:"DATABASE_HOST"`
-	DBPort     string `env:"DATABASE_PORT"`
-	DBUser     string `env:"DATABASE_USER"`
-	DBPassword string `env:"DATABASE_PASSWORD"`
-	DBSchema   string `env:"DATABASE_SCHEMA"`
+	DBHost      string `env:"DATABASE_HOST"`
+	DBPort      string `env:"DATABASE_PORT"`
+	DBUser      string `env:"DATABASE_USER"`
+	DBPassword  string `env:"DATABASE_PASSWORD"`
+	DBSchema    string `env:"DATABASE_SCHEMA"`
+	DBCharset   string `env:"DATABASE_CHARSET"`
+	DBParseTime bool   `env:"DATABASE_PARSE_TIME" envDefault:"true"`
 
 	GinMode string `env:"GIN_MODE" envDefault:"debug"`
 }
@@ -45,6 +48,7 @@ func loadDefaults(cfg *Config) {
 	cfg.DBUser = defaultValue(cfg.DBUser, user)
 	cfg.DBPassword = defaultValue(cfg.DBPassword, password)
 	cfg.DBSchema = defaultValue(cfg.DBSchema, schema)
+	cfg.DBCharset = defaultValue(cfg.DBCharset, charset)
 }
 
 // defaultValue returns the value of v if it's not empty, otherwise returns the default value.
@@ -55,4 +59,3 @@ func defaultValue(v string, def string) string {
 
 	return v
 }
-

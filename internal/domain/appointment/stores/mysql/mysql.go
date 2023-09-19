@@ -41,7 +41,7 @@ func (s *Store) GetAll(_ context.Context, filters map[string]string) []appointme
 	for rows.Next() {
 		var a appointment.Appointment
 
-		err = rows.Scan(&a.ID, &a.PatientID, &a.DentistID, &a.Date, &a.Description)
+		err = rows.Scan(&a.ID, &a.PatientID, &a.DentistID, &a.Date.Time, &a.Description)
 		if err != nil {
 			return []appointment.Appointment{}
 		}
@@ -64,7 +64,7 @@ func (s *Store) GetByID(_ context.Context, ID int) (appointment.Appointment, err
 
 	var a appointment.Appointment
 
-	err = row.Scan(&a.ID, &a.PatientID, &a.DentistID, &a.Date, &a.Description)
+	err = row.Scan(&a.ID, &a.PatientID, &a.DentistID, &a.Date.Time, &a.Description)
 	if err != nil {
 		err := mysql.CheckError(err)
 		switch {
@@ -92,7 +92,7 @@ func (s *Store) Create(_ context.Context, a appointment.Appointment) (appointmen
 		}
 	}(statement)
 
-	result, err := statement.Exec(a.PatientID, a.DentistID, a.Date, a.Description)
+	result, err := statement.Exec(a.PatientID, a.DentistID, a.Date.Time, a.Description)
 	if err != nil {
 		err := mysql.CheckError(err)
 		switch {
@@ -131,7 +131,7 @@ func (s *Store) Update(_ context.Context, a appointment.Appointment) (appointmen
 		}
 	}(statement)
 
-	result, err := statement.Exec(a.PatientID, a.DentistID, a.Date, a.Description, a.ID)
+	result, err := statement.Exec(a.PatientID, a.DentistID, a.Date.Time, a.Description, a.ID)
 	if err != nil {
 		err := mysql.CheckError(err)
 		switch {

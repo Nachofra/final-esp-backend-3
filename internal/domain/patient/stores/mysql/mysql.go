@@ -56,7 +56,7 @@ func (s *Store) GetAll(_ context.Context) ([]patient.Patient, error) {
 			&p.LastName,
 			&p.Address,
 			&p.DNI,
-			&p.DischargeDate,
+			&p.DischargeDate.Time,
 		)
 		if err != nil {
 			return []patient.Patient{}, err
@@ -81,7 +81,7 @@ func (s *Store) GetByID(_ context.Context, id int) (patient.Patient, error) {
 		&p.LastName,
 		&p.Address,
 		&p.DNI,
-		&p.DischargeDate,
+		&p.DischargeDate.Time,
 	)
 	if err != nil {
 		return patient.Patient{}, err
@@ -101,7 +101,7 @@ func (s *Store) GetByDNI(_ context.Context, dni int) (patient.Patient, error) {
 		&p.LastName,
 		&p.Address,
 		&p.DNI,
-		&p.DischargeDate,
+		&p.DischargeDate.Time,
 	)
 	if err != nil {
 		return patient.Patient{}, err
@@ -126,7 +126,7 @@ func (s *Store) Create(_ context.Context, p patient.Patient) (patient.Patient, e
 		p.LastName,
 		p.Address,
 		p.DNI,
-		p.DischargeDate,
+		p.DischargeDate.Time,
 	)
 	if err != nil {
 		return patient.Patient{}, patient.ErrExec
@@ -157,7 +157,7 @@ func (s *Store) Update(_ context.Context, p patient.Patient) (patient.Patient, e
 		p.LastName,
 		p.Address,
 		p.DNI,
-		p.DischargeDate,
+		p.DischargeDate.Time,
 		p.ID,
 	)
 	if err != nil {
