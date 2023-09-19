@@ -46,9 +46,8 @@ func (h *Handler) Create() gin.HandlerFunc {
 		var request dentist.NewDentist
 
 		err := ctx.Bind(&request)
-
 		if err != nil {
-			web.Error(ctx, http.StatusBadRequest, "%s", "bad request")
+			web.Error(ctx, http.StatusBadRequest, "%s", err)
 			return
 		}
 
@@ -133,17 +132,16 @@ func (h *Handler) Update() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 
 		var request dentist.UpdateDentist
-		errBind := ctx.Bind(&request)
 
+		errBind := ctx.Bind(&request)
 		if errBind != nil {
-			web.Error(ctx, http.StatusBadRequest, "%s", "bad request binding")
+			web.Error(ctx, http.StatusBadRequest, "%s", errBind)
 			return
 		}
 
 		id := ctx.Param("id")
 
 		idInt, err := strconv.Atoi(id)
-
 		if err != nil {
 			web.Error(ctx, http.StatusBadRequest, "%s", "bad request param")
 			return
@@ -210,9 +208,8 @@ func (h *Handler) Patch() gin.HandlerFunc {
 		var pd dentist.PatchDentist
 
 		errBind := ctx.Bind(&request)
-
 		if errBind != nil {
-			web.Error(ctx, http.StatusBadRequest, "%s", "bad request binding")
+			web.Error(ctx, http.StatusBadRequest, "%s", errBind)
 			return
 		}
 

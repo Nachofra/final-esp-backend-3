@@ -1,51 +1,51 @@
 package appointment
 
 import (
-	custTime "github.com/Nachofra/final-esp-backend-3/pkg/time"
+	"github.com/Nachofra/final-esp-backend-3/pkg/custom_time"
 	"strconv"
 	"time"
 )
 
 // Appointment describes an Appointment between a dentist and its patient.
 type Appointment struct {
-	ID          int           `json:"id"`
-	PatientID   int           `json:"patient_id"`
-	DentistID   int           `json:"dentist_id"`
-	Date        custTime.Time `json:"date"`
-	Description string        `json:"description"`
+	ID          int              `json:"id"`
+	PatientID   int              `json:"patient_id"`
+	DentistID   int              `json:"dentist_id"`
+	Date        custom_time.Time `json:"date"`
+	Description string           `json:"description"`
 }
 
 // NewAppointment describes the data needed to create a new Appointment.
 type NewAppointment struct {
-	PatientID   int           `json:"patient_id"`
-	DentistID   int           `json:"dentist_id"`
-	Date        custTime.Time `json:"date"`
-	Description string        `json:"description"`
+	PatientID   int              `json:"patient_id"`
+	DentistID   int              `json:"dentist_id"`
+	Date        custom_time.Time `json:"date"`
+	Description string           `json:"description"`
 }
 
 // UpdateAppointment describes the data needed to update an Appointment.
 type UpdateAppointment struct {
-	PatientID   int           `json:"patient_id"`
-	DentistID   int           `json:"dentist_id"`
-	Date        custTime.Time `json:"date"`
-	Description string        `json:"description"`
+	PatientID   int              `json:"patient_id"`
+	DentistID   int              `json:"dentist_id"`
+	Date        custom_time.Time `json:"date"`
+	Description string           `json:"description"`
 }
 
 // PatchAppointment describes the data needed to patch an Appointment.
 type PatchAppointment struct {
-	PatientID   *int           `json:"patient_id"`
-	DentistID   *int           `json:"dentist_id"`
-	Date        *custTime.Time `json:"date"`
-	Description *string        `json:"description"`
+	PatientID   *int              `json:"patient_id"`
+	DentistID   *int              `json:"dentist_id"`
+	Date        *custom_time.Time `json:"date"`
+	Description *string           `json:"description"`
 }
 
 // FilterAppointment describes the data needed to filter an Appointment.
 type FilterAppointment struct {
-	PatientID *int           `form:"patient_id"`
-	DentistID *int           `form:"dentist_id"`
-	DNI       *int           `json:"dni" validate:"len=8"` // TODO: add validation to DNI when doing dependencies initialization (we need to create a singleton validator for all the services that needs it)
-	FromDate  *custTime.Time `form:"from_date"`
-	ToDate    *custTime.Time `form:"to_date"`
+	PatientID *int              `form:"patient_id"`
+	DentistID *int              `form:"dentist_id"`
+	DNI       *int              `form:"dni" validate:"len=8"` // TODO: add validation to DNI when doing dependencies initialization (we need to create a singleton validator for all the services that needs it)
+	FromDate  *custom_time.Time `form:"from_date"`
+	ToDate    *custom_time.Time `form:"to_date"`
 }
 
 // ToMap parses FilterAppointment to a map[string]string.

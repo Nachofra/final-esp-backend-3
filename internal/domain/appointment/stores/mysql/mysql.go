@@ -36,7 +36,7 @@ func (s *Store) GetAll(_ context.Context, filters map[string]string) []appointme
 		}
 	}(rows)
 
-	var appointmentsList []appointment.Appointment
+	appointmentsList := make([]appointment.Appointment, 0)
 
 	for rows.Next() {
 		var a appointment.Appointment

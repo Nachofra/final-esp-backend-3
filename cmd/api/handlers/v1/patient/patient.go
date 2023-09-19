@@ -39,7 +39,7 @@ func (h *Handler) Create() gin.HandlerFunc {
 
 		err := ctx.ShouldBind(&request)
 		if err != nil {
-			web.Error(ctx, http.StatusBadRequest, "%s", "bad request")
+			web.Error(ctx, http.StatusBadRequest, "%s", err)
 			return
 		}
 
@@ -124,10 +124,10 @@ func (h *Handler) Update() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 
 		var request patient.NewPatient
-		errBind := ctx.ShouldBind(&request)
 
+		errBind := ctx.ShouldBind(&request)
 		if errBind != nil {
-			web.Error(ctx, http.StatusBadRequest, "%s", "bad request binding")
+			web.Error(ctx, http.StatusBadRequest, "%s", errBind)
 			return
 		}
 
@@ -170,7 +170,7 @@ func (h *Handler) PatchUpdate() gin.HandlerFunc {
 
 		errBind := ctx.ShouldBind(&request)
 		if errBind != nil {
-			web.Error(ctx, http.StatusBadRequest, "%s", "bad request binding")
+			web.Error(ctx, http.StatusBadRequest, "%s", errBind)
 			return
 		}
 

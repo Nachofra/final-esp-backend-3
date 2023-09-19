@@ -5,7 +5,7 @@ import (
 	"github.com/Nachofra/final-esp-backend-3/internal/domain/appointment"
 	"github.com/Nachofra/final-esp-backend-3/internal/domain/dentist"
 	"github.com/Nachofra/final-esp-backend-3/internal/domain/patient"
-	"github.com/Nachofra/final-esp-backend-3/pkg/time"
+	"github.com/Nachofra/final-esp-backend-3/pkg/custom_time"
 	"github.com/Nachofra/final-esp-backend-3/pkg/web"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -13,9 +13,8 @@ import (
 )
 
 var (
-	ErrInvalidID           = errors.New("invalid ID")
-	ErrInternalServer      = errors.New("internal server error")
-	ErrUnprocessableEntity = errors.New("unprocessable entity: the JSON provided does not conform to the expected entity structure, please review it and try again")
+	ErrInvalidID      = errors.New("invalid request, please check input types")
+	ErrInternalServer = errors.New("internal server error")
 )
 
 type Handler struct {
@@ -50,7 +49,7 @@ func (h *Handler) Create() gin.HandlerFunc {
 
 		err := ctx.ShouldBindJSON(&request)
 		if err != nil {
-			web.Error(ctx, http.StatusUnprocessableEntity, "%s", ErrUnprocessableEntity.Error())
+			web.Error(ctx, http.StatusUnprocessableEntity, "%s", err)
 			return
 		}
 
@@ -58,16 +57,16 @@ func (h *Handler) Create() gin.HandlerFunc {
 		if err != nil {
 			switch {
 			case errors.Is(err, appointment.ErrAlreadyExists):
-				web.Error(ctx, http.StatusConflict, "%s", err.Error())
+				web.Error(ctx, http.StatusConflict, "%s", err)
 				return
 			case errors.Is(err, appointment.ErrConflict):
-				web.Error(ctx, http.StatusConflict, "%s", err.Error())
+				web.Error(ctx, http.StatusConflict, "%s", err)
 				return
 			case errors.Is(err, appointment.ErrValueExceeded):
-				web.Error(ctx, http.StatusUnprocessableEntity, "%s", err.Error())
+				web.Error(ctx, http.StatusUnprocessableEntity, "%s", err)
 				return
 			default:
-				web.Error(ctx, http.StatusInternalServerError, "%s", ErrInternalServer.Error())
+				web.Error(ctx, http.StatusInternalServerError, "%s", ErrInternalServer)
 				return
 			}
 		}
@@ -87,13 +86,15 @@ func (h *Handler) Create() gin.HandlerFunc {
 // @Router /appointment [get]
 func (h *Handler) GetAll() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		dni, err := strconv.Atoi(ctx.Query("dni"))
+		var filters appointment.FilterAppointment
+
+		err := ctx.ShouldBindQuery(&filters)
 		if err != nil {
-			web.Error(ctx, http.StatusBadRequest, "%s", ErrInvalidID.Error())
+			web.Error(ctx, http.StatusBadRequest, "%s", err)
 			return
 		}
 
-		appointments := h.service.GetAll(ctx, appointment.FilterAppointment{DNI: &dni})
+		appointments := h.service.GetAll(ctx, filters)
 
 		web.Success(ctx, http.StatusOK, appointments)
 	}
@@ -115,7 +116,7 @@ func (h *Handler) GetByID() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id, err := strconv.Atoi(ctx.Param("id"))
 		if err != nil {
-			web.Error(ctx, http.StatusBadRequest, "%s", ErrInvalidID.Error())
+			web.Error(ctx, http.StatusBadRequest, "%s", ErrInvalidID)
 			return
 		}
 
@@ -123,10 +124,10 @@ func (h *Handler) GetByID() gin.HandlerFunc {
 		if err != nil {
 			switch {
 			case errors.Is(err, appointment.ErrNotFound):
-				web.Error(ctx, http.StatusNotFound, "%s", err.Error())
+				web.Error(ctx, http.StatusNotFound, "%s", err)
 				return
 			default:
-				web.Error(ctx, http.StatusInternalServerError, "%s", ErrInternalServer.Error())
+				web.Error(ctx, http.StatusInternalServerError, "%s", ErrInternalServer)
 				return
 			}
 		}
@@ -154,7 +155,7 @@ func (h *Handler) Update() gin.HandlerFunc {
 
 		errBind := ctx.ShouldBindJSON(&ua)
 		if errBind != nil {
-			web.Error(ctx, http.StatusUnprocessableEntity, "%s", ErrUnprocessableEntity.Error())
+			web.Error(ctx, http.StatusUnprocessableEntity, "%s", errBind)
 			return
 		}
 
@@ -162,7 +163,7 @@ func (h *Handler) Update() gin.HandlerFunc {
 
 		idInt, err := strconv.Atoi(id)
 		if err != nil {
-			web.Error(ctx, http.StatusBadRequest, "%s", ErrInvalidID.Error())
+			web.Error(ctx, http.StatusBadRequest, "%s", ErrInvalidID)
 			return
 		}
 
@@ -172,13 +173,13 @@ func (h *Handler) Update() gin.HandlerFunc {
 		if err != nil {
 			switch {
 			case errors.Is(err, appointment.ErrConflict):
-				web.Error(ctx, http.StatusConflict, "%s", err.Error())
+				web.Error(ctx, http.StatusConflict, "%s", err)
 				return
 			case errors.Is(err, appointment.ErrValueExceeded):
-				web.Error(ctx, http.StatusUnprocessableEntity, "%s", err.Error())
+				web.Error(ctx, http.StatusUnprocessableEntity, "%s", err)
 				return
 			default:
-				web.Error(ctx, http.StatusInternalServerError, "%s", ErrInternalServer.Error())
+				web.Error(ctx, http.StatusInternalServerError, "%s", ErrInternalServer)
 				return
 			}
 		}
@@ -205,7 +206,7 @@ func (h *Handler) PatchUpdate() gin.HandlerFunc {
 
 		errBind := ctx.ShouldBindJSON(&pa)
 		if errBind != nil {
-			web.Error(ctx, http.StatusUnprocessableEntity, "%s", ErrUnprocessableEntity.Error())
+			web.Error(ctx, http.StatusUnprocessableEntity, "%s", errBind)
 			return
 		}
 
@@ -213,7 +214,7 @@ func (h *Handler) PatchUpdate() gin.HandlerFunc {
 
 		idInt, err := strconv.Atoi(id)
 		if err != nil {
-			web.Error(ctx, http.StatusBadRequest, "%s", ErrInvalidID.Error())
+			web.Error(ctx, http.StatusBadRequest, "%s", ErrInvalidID)
 			return
 		}
 
@@ -223,13 +224,13 @@ func (h *Handler) PatchUpdate() gin.HandlerFunc {
 		if err != nil {
 			switch {
 			case errors.Is(err, appointment.ErrConflict):
-				web.Error(ctx, http.StatusConflict, "%s", err.Error())
+				web.Error(ctx, http.StatusConflict, "%s", err)
 				return
 			case errors.Is(err, appointment.ErrValueExceeded):
-				web.Error(ctx, http.StatusUnprocessableEntity, "%s", err.Error())
+				web.Error(ctx, http.StatusUnprocessableEntity, "%s", err)
 				return
 			default:
-				web.Error(ctx, http.StatusInternalServerError, "%s", ErrInternalServer.Error())
+				web.Error(ctx, http.StatusInternalServerError, "%s", ErrInternalServer)
 				return
 			}
 		}
@@ -253,7 +254,7 @@ func (h *Handler) Delete() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id, err := strconv.Atoi(ctx.Param("id"))
 		if err != nil {
-			web.Error(ctx, http.StatusBadRequest, "%s", ErrInvalidID.Error())
+			web.Error(ctx, http.StatusBadRequest, "%s", ErrInvalidID)
 			return
 		}
 
@@ -261,10 +262,10 @@ func (h *Handler) Delete() gin.HandlerFunc {
 		if err != nil {
 			switch {
 			case errors.Is(err, appointment.ErrConflict):
-				web.Error(ctx, http.StatusConflict, "%s", err.Error())
+				web.Error(ctx, http.StatusConflict, "%s", err)
 				return
 			default:
-				web.Error(ctx, http.StatusInternalServerError, "%s", ErrInternalServer.Error())
+				web.Error(ctx, http.StatusInternalServerError, "%s", ErrInternalServer)
 				return
 			}
 		}
@@ -288,10 +289,10 @@ func (h *Handler) CreateByDNI() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 
 		type NewCreate struct {
-			PatientDNI    int       `json:"patient_dni"`
-			DentistNumber int       `json:"dentist_number"`
-			Date          time.Time `json:"date"`
-			Description   string    `json:"description"`
+			PatientDNI    int              `json:"patient_dni"`
+			DentistNumber int              `json:"dentist_number"`
+			Date          custom_time.Time `json:"date"`
+			Description   string           `json:"description"`
 		}
 
 		var request NewCreate
@@ -301,18 +302,18 @@ func (h *Handler) CreateByDNI() gin.HandlerFunc {
 
 		err := ctx.ShouldBindJSON(&request)
 		if err != nil {
-			web.Error(ctx, http.StatusUnprocessableEntity, "%s", ErrUnprocessableEntity.Error())
+			web.Error(ctx, http.StatusUnprocessableEntity, "%s", err)
 			return
 		}
 
 		pa, err = h.patientService.GetByDNI(ctx, request.PatientDNI)
 		if err != nil {
-			web.Error(ctx, http.StatusUnprocessableEntity, "%s", ErrUnprocessableEntity.Error())
+			web.Error(ctx, http.StatusUnprocessableEntity, "%s", err)
 			return
 		}
 		de, err = h.dentistService.GetByRegistrationNumber(ctx, request.DentistNumber)
 		if err != nil {
-			web.Error(ctx, http.StatusUnprocessableEntity, "%s", ErrUnprocessableEntity.Error())
+			web.Error(ctx, http.StatusUnprocessableEntity, "%s", err)
 			return
 		}
 
@@ -325,16 +326,16 @@ func (h *Handler) CreateByDNI() gin.HandlerFunc {
 		if err != nil {
 			switch {
 			case errors.Is(err, appointment.ErrAlreadyExists):
-				web.Error(ctx, http.StatusConflict, "%s", err.Error())
+				web.Error(ctx, http.StatusConflict, "%s", err)
 				return
 			case errors.Is(err, appointment.ErrConflict):
-				web.Error(ctx, http.StatusConflict, "%s", err.Error())
+				web.Error(ctx, http.StatusConflict, "%s", err)
 				return
 			case errors.Is(err, appointment.ErrValueExceeded):
-				web.Error(ctx, http.StatusUnprocessableEntity, "%s", err.Error())
+				web.Error(ctx, http.StatusUnprocessableEntity, "%s", err)
 				return
 			default:
-				web.Error(ctx, http.StatusInternalServerError, "%s", ErrInternalServer.Error())
+				web.Error(ctx, http.StatusInternalServerError, "%s", ErrInternalServer)
 				return
 			}
 		}
