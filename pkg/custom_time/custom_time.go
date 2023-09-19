@@ -17,7 +17,7 @@ func (t *Time) UnmarshalJSON(b []byte) (err error) {
 
 	// Remove extra quotes from string, remove T and Z when date comes from database.
 	dateStr = strings.Trim(dateStr, "\"")
-	dateStr = strings.Replace(dateStr, "T", "", -1)
+	dateStr = strings.Replace(dateStr, "T", " ", -1)
 	dateStr = strings.Replace(dateStr, "Z", "", -1)
 
 	date, err := time.Parse(time.DateTime, dateStr)
