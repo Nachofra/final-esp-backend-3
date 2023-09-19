@@ -14,6 +14,7 @@ RUN go mod download
 COPY ./cmd/ ./cmd/
 COPY ./internal/ ./internal/
 COPY ./pkg/ ./pkg/
+COPY ./docs/ ./docs/
 
 # Run go mod tidy
 RUN go mod tidy
