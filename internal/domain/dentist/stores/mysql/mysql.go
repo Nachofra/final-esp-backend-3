@@ -48,13 +48,13 @@ func (s *Store) GetAll(_ context.Context) []dentist.Dentist {
 	}
 
 	defer func(rows *sql.Rows) {
-		err := rows.Close()
+		err = rows.Close()
 		if err != nil {
 			log.Println(err)
 		}
 	}(rows)
 
-	var dentistsList []dentist.Dentist
+	dentistsList := make([]dentist.Dentist, 0)
 
 	for rows.Next() {
 		var d dentist.Dentist
@@ -70,10 +70,6 @@ func (s *Store) GetAll(_ context.Context) []dentist.Dentist {
 		}
 
 		dentistsList = append(dentistsList, d)
-	}
-
-	if err := rows.Err(); err != nil {
-		return []dentist.Dentist{}
 	}
 
 	return dentistsList
@@ -137,7 +133,7 @@ func (s *Store) Create(_ context.Context, d dentist.Dentist) (dentist.Dentist, e
 	}
 
 	defer func(statement *sql.Stmt) {
-		err := statement.Close()
+		err = statement.Close()
 		if err != nil {
 			log.Println(err)
 		}
@@ -180,7 +176,7 @@ func (s *Store) Update(_ context.Context, d dentist.Dentist) (dentist.Dentist, e
 	}
 
 	defer func(statement *sql.Stmt) {
-		err := statement.Close()
+		err = statement.Close()
 		if err != nil {
 			log.Println(err)
 		}

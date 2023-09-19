@@ -150,7 +150,6 @@ func (h *Handler) GetByID() gin.HandlerFunc {
 func (h *Handler) Update() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 
-		var request appointment.Appointment
 		var ua appointment.UpdateAppointment
 
 		errBind := ctx.ShouldBindJSON(&ua)
@@ -167,9 +166,7 @@ func (h *Handler) Update() gin.HandlerFunc {
 			return
 		}
 
-		request.ID = idInt
-
-		app, err := h.service.Update(ctx, request, ua)
+		app, err := h.service.Update(ctx, idInt, ua)
 		if err != nil {
 			switch {
 			case errors.Is(err, appointment.ErrConflict):
@@ -187,10 +184,10 @@ func (h *Handler) Update() gin.HandlerFunc {
 	}
 }
 
-// PatchUpdate is the handler in charge of appointment updating flow.
+// Patch is the handler in charge of appointment updating flow.
 // Appointment godoc
 // @Summary appointment example
-// @Description PatchUpdate appointment by id
+// @Description Patch appointment by id
 // @Tags appointment
 // @Accept json
 // @Produce json
@@ -198,7 +195,7 @@ func (h *Handler) Update() gin.HandlerFunc {
 // @Failure 400 {object} web.errorResponse
 // @Failure 500 {object} web.errorResponse
 // @Router /appointment/:id [patch]
-func (h *Handler) PatchUpdate() gin.HandlerFunc {
+func (h *Handler) Patch() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 
 		var pa appointment.PatchAppointment
@@ -219,8 +216,14 @@ func (h *Handler) PatchUpdate() gin.HandlerFunc {
 
 		app, err = h.service.GetByID(ctx, idInt)
 		if err != nil {
-			web.Error(ctx, http.StatusUnprocessableEntity, "%s", err)
-			return
+			switch {
+			case errors.Is(err, appointment.ErrNotFound):
+				web.Error(ctx, http.StatusNotFound, "%s", err)
+				return
+			default:
+				web.Error(ctx, http.StatusInternalServerError, "%s", ErrInternalServer)
+				return
+			}
 		}
 
 		a, err := h.service.Patch(ctx, app, pa)

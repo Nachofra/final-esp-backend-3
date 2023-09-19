@@ -211,7 +211,7 @@ func (h *Handler) Delete() gin.HandlerFunc {
 // Patch is the handler in charge of appointment patching flow.
 // Dentist godoc
 // @Summary dentist example
-// @Description Update dentist by id
+// @Description Patch dentist by id
 // @Tags dentist
 // @Accept json
 // @Produce json

@@ -21,19 +21,30 @@ type Store interface {
 	Delete(ctx context.Context, id int) error
 }
 
-type Service struct {
+type service struct {
 	store Store
 }
 
+// Service specifies the contract needed for the Service.
+type Service interface {
+	Create(ctx context.Context, newPatient NewPatient) (Patient, error)
+	GetAll(ctx context.Context) []Patient
+	GetByID(ctx context.Context, id int) (Patient, error)
+	GetByDNI(ctx context.Context, dni int) (Patient, error)
+	Update(ctx context.Context, newPatient NewPatient, id int) (Patient, error)
+	Patch(ctx context.Context, patient Patient, pp PatchPatient) (Patient, error)
+	Delete(ctx context.Context, id int) error
+}
+
 // NewService creates a new service.
-func NewService(store Store) *Service {
-	return &Service{
+func NewService(store Store) Service {
+	return &service{
 		store: store,
 	}
 }
 
 // Create creates a new patient.
-func (s *Service) Create(ctx context.Context, newPatient NewPatient) (Patient, error) {
+func (s *service) Create(ctx context.Context, newPatient NewPatient) (Patient, error) {
 	patient := requestToPatient(newPatient)
 
 	response, err := s.store.Create(ctx, patient)
@@ -45,13 +56,13 @@ func (s *Service) Create(ctx context.Context, newPatient NewPatient) (Patient, e
 }
 
 // GetAll returns all patients.
-func (s *Service) GetAll(ctx context.Context) []Patient {
+func (s *service) GetAll(ctx context.Context) []Patient {
 	patients := s.store.GetAll(ctx)
 	return patients
 }
 
 // GetByID returns a patient by its ID.
-func (s *Service) GetByID(ctx context.Context, id int) (Patient, error) {
+func (s *service) GetByID(ctx context.Context, id int) (Patient, error) {
 	patient, err := s.store.GetByID(ctx, id)
 	if err != nil {
 		return Patient{}, err
@@ -61,7 +72,7 @@ func (s *Service) GetByID(ctx context.Context, id int) (Patient, error) {
 }
 
 // GetByDNI returns a patient by its DNI.
-func (s *Service) GetByDNI(ctx context.Context, dni int) (Patient, error) {
+func (s *service) GetByDNI(ctx context.Context, dni int) (Patient, error) {
 	patient, err := s.store.GetByDNI(ctx, dni)
 	if err != nil {
 		return Patient{}, err
@@ -71,7 +82,7 @@ func (s *Service) GetByDNI(ctx context.Context, dni int) (Patient, error) {
 }
 
 // Update updates a patient.
-func (s *Service) Update(ctx context.Context, newPatient NewPatient, id int) (Patient, error) {
+func (s *service) Update(ctx context.Context, newPatient NewPatient, id int) (Patient, error) {
 	patient := requestToPatient(newPatient)
 	patient.ID = id
 
@@ -84,7 +95,7 @@ func (s *Service) Update(ctx context.Context, newPatient NewPatient, id int) (Pa
 }
 
 // Patch patches a patient.
-func (s *Service) Patch(ctx context.Context, patient Patient, pp PatchPatient) (Patient, error) {
+func (s *service) Patch(ctx context.Context, patient Patient, pp PatchPatient) (Patient, error) {
 	if pp.FirstName != nil {
 		patient.FirstName = *pp.FirstName
 	}
@@ -114,7 +125,7 @@ func (s *Service) Patch(ctx context.Context, patient Patient, pp PatchPatient) (
 }
 
 // Delete deletes a patient.
-func (s *Service) Delete(ctx context.Context, id int) error {
+func (s *service) Delete(ctx context.Context, id int) error {
 	err := s.store.Delete(ctx, id)
 	if err != nil {
 		return err

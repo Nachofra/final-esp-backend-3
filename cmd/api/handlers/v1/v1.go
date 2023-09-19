@@ -56,7 +56,7 @@ func Routes(eng *gin.Engine, cfg Config) {
 		d.DELETE("/:id", middleware.Authenticate(), dentistHandler.Delete())
 	}
 
-	patientHandler := handlerPatient.NewHandler(*patientService)
+	patientHandler := handlerPatient.NewHandler(patientService)
 	p := v1.Group("/patient")
 	{
 		p.GET("/:id", patientHandler.GetByID())
@@ -67,7 +67,7 @@ func Routes(eng *gin.Engine, cfg Config) {
 		p.DELETE("/:id", middleware.Authenticate(), patientHandler.Delete())
 	}
 
-	appointmentHandler := handlerAppointment.NewHandler(*appointmentService, *patientService, dentistService)
+	appointmentHandler := handlerAppointment.NewHandler(appointmentService, patientService, dentistService)
 	a := v1.Group("/appointment")
 	{
 		a.GET("/:id", appointmentHandler.GetByID())
@@ -75,7 +75,7 @@ func Routes(eng *gin.Engine, cfg Config) {
 		a.POST("/", middleware.Authenticate(), appointmentHandler.Create())
 		a.POST("/dni", middleware.Authenticate(), appointmentHandler.CreateByDNI())
 		a.PUT("/:id", middleware.Authenticate(), appointmentHandler.Update())
-		a.PATCH("/:id", middleware.Authenticate(), appointmentHandler.PatchUpdate())
+		a.PATCH("/:id", middleware.Authenticate(), appointmentHandler.Patch())
 		a.DELETE("/:id", middleware.Authenticate(), appointmentHandler.Delete())
 	}
 

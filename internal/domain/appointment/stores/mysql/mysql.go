@@ -81,7 +81,7 @@ func (s *Store) Create(_ context.Context, a appointment.Appointment) (appointmen
 	}
 
 	defer func(statement *sql.Stmt) {
-		err := statement.Close()
+		err = statement.Close()
 		if err != nil {
 			log.Println(err)
 		}
@@ -120,7 +120,7 @@ func (s *Store) Update(_ context.Context, a appointment.Appointment) (appointmen
 	}
 
 	defer func(statement *sql.Stmt) {
-		err := statement.Close()
+		err = statement.Close()
 		if err != nil {
 			log.Println(err)
 		}
