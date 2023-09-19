@@ -17,11 +17,13 @@ var (
 	ErrInternalServer = errors.New("internal server error")
 )
 
+// Handler is a structure for dentist handler.
 type Handler struct {
 	service   dentist.Service
 	validator *en_validator.Validator
 }
 
+// NewHandler is a function to create a handler
 func NewHandler(service dentist.Service, validator *en_validator.Validator) *Handler {
 	return &Handler{
 		service:   service,

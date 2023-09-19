@@ -9,6 +9,7 @@ import (
 	"strings"
 )
 
+// Validator is a struc for validations
 type Validator struct {
 	Validate   *validator.Validate
 	Translator ut.Translator

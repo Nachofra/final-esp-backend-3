@@ -23,6 +23,7 @@ var (
 	WHERE id = ?`
 )
 
+// Store wraps all the operations to the database.
 type Store struct {
 	db *sql.DB
 }
