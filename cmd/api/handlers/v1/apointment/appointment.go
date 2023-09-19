@@ -12,6 +12,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 var (
@@ -107,7 +108,13 @@ func (h *Handler) GetAll() gin.HandlerFunc {
 
 		err := ctx.ShouldBindQuery(&filters)
 		if err != nil {
-			web.Error(ctx, http.StatusBadRequest, "%s", err)
+			msg := ""
+
+			if strings.Contains(err.Error(), "top-level") {
+				msg = ": If you are using dates via query parameters, please ensure they are wrapped in quotes."
+			}
+
+			web.Error(ctx, http.StatusBadRequest, "%s%s", err, msg)
 			return
 		}
 
