@@ -92,7 +92,7 @@ func (s *Service) Patch(ctx context.Context, appointment Appointment, pa PatchAp
 		appointment.PatientID = *pa.PatientID
 	}
 
-	if pa.Description != nil {
+	if pa.DentistID != nil {
 		appointment.DentistID = *pa.DentistID
 	}
 
