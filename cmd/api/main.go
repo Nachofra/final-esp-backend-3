@@ -23,6 +23,8 @@ func main() {
 		mysql.WithPassword(cfg.DBPassword),
 		mysql.WithHost(cfg.DBHost+":"+cfg.DBPort),
 		mysql.WithName(cfg.DBSchema),
+		mysql.WithCharset(cfg.DBCharset),
+		mysql.WithParseTime(cfg.DBParseTime),
 	))
 	if err != nil {
 		panic(err)

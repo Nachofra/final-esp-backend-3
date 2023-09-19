@@ -41,6 +41,8 @@ DATABASE_PORT=3307
 DATABASE_USER=root
 DATABASE_PASSWORD=root
 DATABASE_SCHEMA=clinic
+DATABASE_CHARSET=utf8
+DATABASE_PARSE_TIME=true
 
 # Gin configuration (execution mode)
 GIN_MODE=debug
