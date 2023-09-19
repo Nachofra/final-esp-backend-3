@@ -34,7 +34,7 @@ type Service interface {
 	GetByRegistrationNumber(ctx context.Context, rn int) (Dentist, error)
 	Update(ctx context.Context, updateDentist UpdateDentist, id int) (Dentist, error)
 	Delete(ctx context.Context, id int) error
-	Patch(ctx context.Context, dentist Dentist, pd PatchDentist) (Dentist, error)
+	Patch(ctx context.Context, dentist Dentist, nd NewDentist) (Dentist, error)
 }
 
 // NewService creates a new product service.
@@ -115,29 +115,29 @@ func (s *service) Delete(ctx context.Context, id int) error {
 }
 
 // Patch patches an appointment.
-func (s *service) Patch(ctx context.Context, dentist Dentist, pd PatchDentist) (Dentist, error) {
+func (s *service) Patch(ctx context.Context, dentist Dentist, nd NewDentist) (Dentist, error) {
 	fmt.Println(dentist)
-	fmt.Println(pd.FirstName)
-	fmt.Println(pd.LastName)
-	fmt.Println(pd.RegistrationNumber)
-	if pd.FirstName != nil {
-		dentist.FirstName = *pd.FirstName
+	fmt.Println(nd.FirstName)
+	fmt.Println(nd.LastName)
+	fmt.Println(nd.RegistrationNumber)
+	if nd.FirstName != "" {
+		dentist.FirstName = nd.FirstName
 	}
 
-	if pd.LastName != nil {
-		dentist.LastName = *pd.LastName
+	if nd.LastName != "" {
+		dentist.LastName = nd.LastName
 	}
 
-	if pd.RegistrationNumber != nil {
-		dentist.RegistrationNumber = *pd.RegistrationNumber
+	if nd.RegistrationNumber != 0 {
+		dentist.RegistrationNumber = nd.RegistrationNumber
 	}
 
-	a, err := s.store.Update(ctx, dentist)
+	d, err := s.store.Update(ctx, dentist)
 	if err != nil {
 		return Dentist{}, err
 	}
 
-	return a, nil
+	return d, nil
 }
 
 func newToDentist(newDentist NewDentist) Dentist {

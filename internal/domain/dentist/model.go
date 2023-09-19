@@ -24,7 +24,7 @@ type UpdateDentist struct {
 
 // PatchDentist describes the data needed to patch a Dentist.
 type PatchDentist struct {
-	FirstName          *string `json:"patient_id"`
-	LastName           *string `json:"dentist_id"`
-	RegistrationNumber *int    `json:"date"`
+	FirstName          string `json:"patient_id"`
+	LastName           string `json:"dentist_id"`
+	RegistrationNumber int    `json:"date"`
 }

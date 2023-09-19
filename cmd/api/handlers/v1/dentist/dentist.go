@@ -204,16 +204,29 @@ func (h *Handler) Delete() gin.HandlerFunc {
 func (h *Handler) Patch() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 
-		var request dentist.Dentist
-		var pd dentist.PatchDentist
+		var de dentist.Dentist
+		var nd dentist.NewDentist
 
-		errBind := ctx.Bind(&request)
+		errBind := ctx.ShouldBind(&nd)
 		if errBind != nil {
 			web.Error(ctx, http.StatusBadRequest, "%s", errBind)
 			return
 		}
 
-		dentist, err := h.service.Patch(ctx, request, pd)
+		id := ctx.Param("id")
+		idInt, err := strconv.Atoi(id)
+		if err != nil {
+			web.Error(ctx, http.StatusBadRequest, "%s", "bad request param")
+			return
+		}
+
+		de, err = h.service.GetByID(ctx, idInt)
+		if err != nil {
+			web.Error(ctx, http.StatusBadRequest, "%s", "bad request param")
+			return
+		}
+
+		dentist, err := h.service.Patch(ctx, de, nd)
 		if err != nil {
 			web.Error(ctx, http.StatusInternalServerError, "%s", "internal server error")
 			return
