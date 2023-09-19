@@ -8,7 +8,7 @@ import (
 var (
 	ErrNotFound      = errors.New("dentist not found")
 	ErrConflict      = errors.New("constraint conflict while storing")
-	ErrAlreadyExists = errors.New("dentist already exists")
+	ErrAlreadyExists = errors.New("dentist already exists, registration number must be unique")
 	ErrValueExceeded = errors.New("attribute value exceed type limit")
 )
 
