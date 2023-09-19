@@ -52,7 +52,7 @@ func Routes(eng *gin.Engine, cfg Config) {
 		d.GET("", dentistHandler.GetAll())
 		d.POST("/", middleware.Authenticate(), dentistHandler.Create())
 		d.PUT("/:id", middleware.Authenticate(), dentistHandler.Update())
-		d.PATCH("/", middleware.Authenticate(), dentistHandler.Patch())
+		d.PATCH("/:id", middleware.Authenticate(), dentistHandler.Patch())
 		d.DELETE("/:id", middleware.Authenticate(), dentistHandler.Delete())
 	}
 

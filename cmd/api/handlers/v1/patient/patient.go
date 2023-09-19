@@ -165,26 +165,29 @@ func (h *Handler) Update() gin.HandlerFunc {
 func (h *Handler) PatchUpdate() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 
-		var request patient.Patient
 		var np patient.NewPatient
+		var pa patient.Patient
 
-		errBind := ctx.ShouldBind(&request)
+		errBind := ctx.ShouldBind(&np)
 		if errBind != nil {
 			web.Error(ctx, http.StatusBadRequest, "%s", errBind)
 			return
 		}
 
 		id := ctx.Param("id")
-
 		idInt, err := strconv.Atoi(id)
 		if err != nil {
 			web.Error(ctx, http.StatusBadRequest, "%s", "bad request param")
 			return
 		}
 
-		request, _ = h.service.GetByID(ctx, idInt)
+		pa, err = h.service.GetByID(ctx, idInt)
+		if err != nil {
+			web.Error(ctx, http.StatusBadRequest, "%s", "bad request param")
+			return
+		}
 
-		p, err := h.service.Patch(ctx, request, np)
+		p, err := h.service.Patch(ctx, pa, np)
 		if err != nil {
 			web.Error(ctx, http.StatusInternalServerError, "%s", "internal server error")
 			return
