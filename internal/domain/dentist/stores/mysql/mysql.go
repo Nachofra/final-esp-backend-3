@@ -159,7 +159,6 @@ func (s *Store) Update(_ context.Context, d dentist.Dentist) (dentist.Dentist, e
 	defer func(statement *sql.Stmt) {
 		err := statement.Close()
 		if err != nil {
-			//TODO que hago aca?
 			panic("IMPLEMENT LOGGER")
 		}
 	}(statement)
