@@ -19,6 +19,7 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"log"
+	"net/http"
 )
 
 // Config has all the dependencies and requirements to initialize handlers.
@@ -32,6 +33,11 @@ type Config struct {
 // Routes sets all the version 1 routes.
 func Routes(eng *gin.Engine, cfg Config) {
 	cfg.Log.Println("configuring v1 routes")
+
+	// Ping default endpoint
+	eng.GET("/ping", func(c *gin.Context) {
+		c.JSON(http.StatusOK, "pong")
+	})
 
 	const prefix = "/v1"
 	v1 := eng.Group(prefix)

@@ -1,15 +1,182 @@
 basePath: /v1
 definitions:
+  appointment.Appointment:
+    properties:
+      date:
+        type: string
+      dentist_id:
+        type: integer
+      description:
+        type: string
+      id:
+        type: integer
+      patient_id:
+        type: integer
+    type: object
+  appointment.NewAppointment:
+    properties:
+      date:
+        type: string
+      dentist_id:
+        type: integer
+      description:
+        type: string
+      patient_id:
+        type: integer
+    required:
+    - date
+    - dentist_id
+    - description
+    - patient_id
+    type: object
+  appointment.NewAppointmentDNIRegistrationNumber:
+    properties:
+      date:
+        type: string
+      dentist_number:
+        type: integer
+      description:
+        type: string
+      patient_dni:
+        maximum: 999999999
+        minimum: 100000
+        type: integer
+    required:
+    - date
+    - dentist_number
+    - description
+    - patient_dni
+    type: object
+  appointment.PatchAppointment:
+    properties:
+      date:
+        type: string
+      dentist_id:
+        type: integer
+      description:
+        type: string
+      patient_id:
+        type: integer
+    type: object
+  appointment.UpdateAppointment:
+    properties:
+      date:
+        type: string
+      dentist_id:
+        type: integer
+      description:
+        type: string
+      patient_id:
+        type: integer
+    required:
+    - date
+    - dentist_id
+    - description
+    - patient_id
+    type: object
+  dentist.Dentist:
+    properties:
+      first_name:
+        type: string
+      id:
+        type: integer
+      last_name:
+        type: string
+      registration_number:
+        type: integer
+    type: object
+  dentist.NewDentist:
+    properties:
+      first_name:
+        type: string
+      last_name:
+        type: string
+      registration_number:
+        type: integer
+    required:
+    - first_name
+    - last_name
+    - registration_number
+    type: object
+  dentist.PatchDentist:
+    properties:
+      first_name:
+        type: string
+      last_name:
+        type: string
+      registration_number:
+        type: integer
+    type: object
+  dentist.UpdateDentist:
+    properties:
+      first_name:
+        type: string
+      last_name:
+        type: string
+      registration_number:
+        type: integer
+    required:
+    - first_name
+    - last_name
+    - registration_number
+    type: object
+  patient.NewPatient:
+    properties:
+      address:
+        type: string
+      discharge_date:
+        type: string
+      dni:
+        maximum: 99999999
+        minimum: 100000
+        type: integer
+      first_name:
+        type: string
+      last_name:
+        type: string
+    required:
+    - address
+    - discharge_date
+    - dni
+    - first_name
+    - last_name
+    type: object
+  patient.PatchPatient:
+    properties:
+      address:
+        type: string
+      discharge_date:
+        type: string
+      dni:
+        maximum: 99999999
+        minimum: 100000
+        type: integer
+      first_name:
+        type: string
+      last_name:
+        type: string
+    type: object
+  patient.Patient:
+    properties:
+      address:
+        type: string
+      discharge_date:
+        type: string
+      dni:
+        type: integer
+      first_name:
+        type: string
+      id:
+        type: integer
+      last_name:
+        type: string
+    type: object
   web.errorResponse:
     properties:
       code:
         type: string
       message:
         type: string
-    type: object
-  web.response:
-    properties:
-      data: {}
     type: object
 info:
   contact: {}
@@ -21,50 +188,93 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get all appointments
+      description: Get a list of all appointments with optional query parameters
+      parameters:
+      - in: query
+        name: dentist_id
+        type: integer
+      - in: query
+        maximum: 99999999
+        minimum: 100000
+        name: dni
+        type: integer
+      - in: query
+        name: from_date
+        type: string
+      - in: query
+        name: patient_id
+        type: integer
+      - in: query
+        name: to_date
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/web.response'
+            items:
+              $ref: '#/definitions/appointment.Appointment'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/web.errorResponse'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/web.errorResponse'
-      summary: appointment example
+      summary: Get all appointments
       tags:
       - appointment
     post:
       consumes:
       - application/json
-      description: Create a new appointment
+      description: Create a new appointment with JSON input
+      parameters:
+      - description: Appointment data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/appointment.NewAppointment'
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
           schema:
-            $ref: '#/definitions/web.response'
+            $ref: '#/definitions/appointment.Appointment'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "422":
+          description: Unprocessable Entity
           schema:
             $ref: '#/definitions/web.errorResponse'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/web.errorResponse'
-      summary: appointment example
+      summary: Create a new appointment
       tags:
       - appointment
-  /appointment/:id:
+  /appointment/{id}:
     delete:
       consumes:
       - application/json
-      description: Delete appointment by id
+      description: Delete an appointment by its unique ID
       parameters:
-      - description: appointment id
+      - description: Appointment ID
         in: path
         name: id
         required: true
@@ -72,27 +282,33 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/web.response'
+        "204":
+          description: No Content
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "409":
+          description: Conflict
           schema:
             $ref: '#/definitions/web.errorResponse'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/web.errorResponse'
-      summary: appointment example
+      summary: Delete an appointment by ID
       tags:
       - appointment
     get:
       consumes:
       - application/json
-      description: Get appointment by id
+      description: Get an appointment by its unique ID
       parameters:
-      - description: appointment id
+      - description: Appointment ID
         in: path
         name: id
         required: true
@@ -103,133 +319,222 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/web.response'
+            $ref: '#/definitions/appointment.Appointment'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "404":
+          description: Not Found
           schema:
             $ref: '#/definitions/web.errorResponse'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/web.errorResponse'
-      summary: appointment example
+      summary: Get an appointment by ID
       tags:
       - appointment
     patch:
       consumes:
       - application/json
-      description: Patch appointment by id
+      description: Partially update an appointment with JSON input by its unique ID
+      parameters:
+      - description: Appointment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Partial update data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/appointment.PatchAppointment'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/web.response'
+            $ref: '#/definitions/appointment.Appointment'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "422":
+          description: Unprocessable Entity
           schema:
             $ref: '#/definitions/web.errorResponse'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/web.errorResponse'
-      summary: appointment example
+      summary: Partially update an appointment by ID
       tags:
       - appointment
     put:
       consumes:
       - application/json
-      description: Update appointment by id
+      description: Update an appointment with JSON input by its unique ID
+      parameters:
+      - description: Appointment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated appointment data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/appointment.UpdateAppointment'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/web.response'
+            $ref: '#/definitions/appointment.Appointment'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "422":
+          description: Unprocessable Entity
           schema:
             $ref: '#/definitions/web.errorResponse'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/web.errorResponse'
-      summary: appointment example
+      summary: Update an appointment by ID
       tags:
       - appointment
   /appointment/dni:
     post:
       consumes:
       - application/json
-      description: Create a new appointment
+      description: Create a new appointment with JSON input using patient DNI and
+        dentist registration number
+      parameters:
+      - description: Appointment data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/appointment.NewAppointmentDNIRegistrationNumber'
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
           schema:
-            $ref: '#/definitions/web.response'
+            $ref: '#/definitions/appointment.Appointment'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "422":
+          description: Unprocessable Entity
           schema:
             $ref: '#/definitions/web.errorResponse'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/web.errorResponse'
-      summary: appointment example
+      summary: Create an appointment by patient DNI and dentist registration number
       tags:
       - appointment
   /dentist:
     get:
       consumes:
       - application/json
-      description: Get all dentists
+      description: Get a list of all dentists
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/web.response'
+            items:
+              $ref: '#/definitions/dentist.Dentist'
+            type: array
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/web.errorResponse'
-      summary: dentist example
+      summary: Get all dentists
       tags:
       - dentist
     post:
       consumes:
       - application/json
-      description: Create a new dentist
+      description: Create a new dentist with JSON input
+      parameters:
+      - description: Dentist data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dentist.NewDentist'
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
           schema:
-            $ref: '#/definitions/web.response'
+            $ref: '#/definitions/dentist.Dentist'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "422":
+          description: Unprocessable Entity
           schema:
             $ref: '#/definitions/web.errorResponse'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/web.errorResponse'
-      summary: dentist example
+      summary: Create a new dentist
       tags:
       - dentist
-  /dentist/:id:
+  /dentist/{id}:
     delete:
       consumes:
       - application/json
-      description: Delete dentist by id
+      description: Delete a dentist by its unique ID
       parameters:
-      - description: dentist id
+      - description: Dentist ID
         in: path
         name: id
         required: true
@@ -237,27 +542,33 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/web.response'
+        "204":
+          description: No Content
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "409":
+          description: Conflict
           schema:
             $ref: '#/definitions/web.errorResponse'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/web.errorResponse'
-      summary: dentist example
+      summary: Delete a dentist by ID
       tags:
       - dentist
     get:
       consumes:
       - application/json
-      description: Get dentist by id
+      description: Get a dentist by its unique ID
       parameters:
-      - description: dentist id
+      - description: Dentist ID
         in: path
         name: id
         required: true
@@ -268,110 +579,179 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/web.response'
+            $ref: '#/definitions/dentist.Dentist'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "404":
+          description: Not Found
           schema:
             $ref: '#/definitions/web.errorResponse'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/web.errorResponse'
-      summary: dentist example
+      summary: Get a dentist by ID
       tags:
       - dentist
     patch:
       consumes:
       - application/json
-      description: Patch dentist by id
+      description: Partially update a dentist with JSON input by its unique ID
+      parameters:
+      - description: Dentist ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Partial update data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dentist.PatchDentist'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/web.response'
+            $ref: '#/definitions/dentist.Dentist'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "422":
+          description: Unprocessable Entity
           schema:
             $ref: '#/definitions/web.errorResponse'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/web.errorResponse'
-      summary: dentist example
+      summary: Partially update a dentist by ID
       tags:
       - dentist
     put:
       consumes:
       - application/json
-      description: Update dentist by id
+      description: Update a dentist with JSON input by its unique ID
+      parameters:
+      - description: Dentist ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated dentist data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dentist.UpdateDentist'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/web.response'
+            $ref: '#/definitions/dentist.Dentist'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "422":
+          description: Unprocessable Entity
           schema:
             $ref: '#/definitions/web.errorResponse'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/web.errorResponse'
-      summary: dentist example
+      summary: Update a dentist by ID
       tags:
       - dentist
   /patient:
     get:
       consumes:
       - application/json
-      description: Get all patients
+      description: Get a list of all patients
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/web.response'
+            items:
+              $ref: '#/definitions/patient.Patient'
+            type: array
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/web.errorResponse'
-      summary: patient example
+      summary: Get all patients
       tags:
       - patient
     post:
       consumes:
       - application/json
-      description: Create a new patient
+      description: Create a new patient with JSON input
+      parameters:
+      - description: Patient data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/patient.NewPatient'
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
           schema:
-            $ref: '#/definitions/web.response'
+            $ref: '#/definitions/patient.Patient'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "422":
+          description: Unprocessable Entity
           schema:
             $ref: '#/definitions/web.errorResponse'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/web.errorResponse'
-      summary: patient example
+      summary: Create a new patient
       tags:
       - patient
-  /patient/:id:
+  /patient/{id}:
     delete:
       consumes:
       - application/json
-      description: Delete patient by id
+      description: Delete a patient by its unique ID
       parameters:
-      - description: patient id
+      - description: Patient ID
         in: path
         name: id
         required: true
@@ -379,27 +759,33 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/web.response'
+        "204":
+          description: No Content
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "409":
+          description: Conflict
           schema:
             $ref: '#/definitions/web.errorResponse'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/web.errorResponse'
-      summary: patient example
+      summary: Delete a patient by ID
       tags:
       - patient
     get:
       consumes:
       - application/json
-      description: Get patient by id
+      description: Get a patient by its unique ID
       parameters:
-      - description: patient id
+      - description: Patient ID
         in: path
         name: id
         required: true
@@ -410,60 +796,112 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/web.response'
+            $ref: '#/definitions/patient.Patient'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "404":
+          description: Not Found
           schema:
             $ref: '#/definitions/web.errorResponse'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/web.errorResponse'
-      summary: patient example
+      summary: Get a patient by ID
       tags:
       - patient
     patch:
       consumes:
       - application/json
-      description: Patch patient by id
+      description: Partially update a patient with JSON input by its unique ID
+      parameters:
+      - description: Patient ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Partial update data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/patient.PatchPatient'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/web.response'
+            $ref: '#/definitions/patient.Patient'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "422":
+          description: Unprocessable Entity
           schema:
             $ref: '#/definitions/web.errorResponse'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/web.errorResponse'
-      summary: patient example
+      summary: Partially update a patient by ID
       tags:
       - patient
     put:
       consumes:
       - application/json
-      description: Update patient by id
+      description: Update a patient with JSON input by its unique ID
+      parameters:
+      - description: Patient ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated patient data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/patient.NewPatient'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/web.response'
+            $ref: '#/definitions/patient.Patient'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "422":
+          description: Unprocessable Entity
           schema:
             $ref: '#/definitions/web.errorResponse'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/web.errorResponse'
-      summary: patient example
+      summary: Update a patient by ID
       tags:
       - patient
 swagger: "2.0"

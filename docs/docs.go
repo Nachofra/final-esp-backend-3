@@ -17,7 +17,7 @@ const docTemplate = `{
     "paths": {
         "/appointment": {
             "get": {
-                "description": "Get all appointments",
+                "description": "Get a list of all appointments with optional query parameters",
                 "consumes": [
                     "application/json"
                 ],
@@ -27,12 +27,56 @@ const docTemplate = `{
                 "tags": [
                     "appointment"
                 ],
-                "summary": "appointment example",
+                "summary": "Get all appointments",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "dentist_id",
+                        "in": "query"
+                    },
+                    {
+                        "maximum": 99999999,
+                        "minimum": 100000,
+                        "type": "integer",
+                        "name": "dni",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "from_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "patient_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "to_date",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/web.response"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/appointment.Appointment"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
                         }
                     },
                     "500": {
@@ -44,7 +88,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Create a new appointment",
+                "description": "Create a new appointment with JSON input",
                 "consumes": [
                     "application/json"
                 ],
@@ -54,56 +98,23 @@ const docTemplate = `{
                 "tags": [
                     "appointment"
                 ],
-                "summary": "appointment example",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/web.response"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/web.errorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/web.errorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/appointment/:id": {
-            "get": {
-                "description": "Get appointment by id",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "appointment"
-                ],
-                "summary": "appointment example",
+                "summary": "Create a new appointment",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "appointment id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
+                        "description": "Appointment data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/appointment.NewAppointment"
+                        }
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
+                    "201": {
+                        "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/web.response"
+                            "$ref": "#/definitions/appointment.Appointment"
                         }
                     },
                     "400": {
@@ -112,110 +123,14 @@ const docTemplate = `{
                             "$ref": "#/definitions/web.errorResponse"
                         }
                     },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/web.errorResponse"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Update appointment by id",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "appointment"
-                ],
-                "summary": "appointment example",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/web.response"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
+                    "409": {
+                        "description": "Conflict",
                         "schema": {
                             "$ref": "#/definitions/web.errorResponse"
                         }
                     },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/web.errorResponse"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Delete appointment by id",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "appointment"
-                ],
-                "summary": "appointment example",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "appointment id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/web.response"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/web.errorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/web.errorResponse"
-                        }
-                    }
-                }
-            },
-            "patch": {
-                "description": "Patch appointment by id",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "appointment"
-                ],
-                "summary": "appointment example",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/web.response"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
+                    "422": {
+                        "description": "Unprocessable Entity",
                         "schema": {
                             "$ref": "#/definitions/web.errorResponse"
                         }
@@ -231,7 +146,7 @@ const docTemplate = `{
         },
         "/appointment/dni": {
             "post": {
-                "description": "Create a new appointment",
+                "description": "Create a new appointment with JSON input using patient DNI and dentist registration number",
                 "consumes": [
                     "application/json"
                 ],
@@ -241,16 +156,284 @@ const docTemplate = `{
                 "tags": [
                     "appointment"
                 ],
-                "summary": "appointment example",
-                "responses": {
-                    "200": {
-                        "description": "OK",
+                "summary": "Create an appointment by patient DNI and dentist registration number",
+                "parameters": [
+                    {
+                        "description": "Appointment data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
                         "schema": {
-                            "$ref": "#/definitions/web.response"
+                            "$ref": "#/definitions/appointment.NewAppointmentDNIRegistrationNumber"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/appointment.Appointment"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/appointment/{id}": {
+            "get": {
+                "description": "Get an appointment by its unique ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "appointment"
+                ],
+                "summary": "Get an appointment by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Appointment ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/appointment.Appointment"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update an appointment with JSON input by its unique ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "appointment"
+                ],
+                "summary": "Update an appointment by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Appointment ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated appointment data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/appointment.UpdateAppointment"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/appointment.Appointment"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete an appointment by its unique ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "appointment"
+                ],
+                "summary": "Delete an appointment by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Appointment ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Partially update an appointment with JSON input by its unique ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "appointment"
+                ],
+                "summary": "Partially update an appointment by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Appointment ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Partial update data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/appointment.PatchAppointment"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/appointment.Appointment"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
                         "schema": {
                             "$ref": "#/definitions/web.errorResponse"
                         }
@@ -266,7 +449,7 @@ const docTemplate = `{
         },
         "/dentist": {
             "get": {
-                "description": "Get all dentists",
+                "description": "Get a list of all dentists",
                 "consumes": [
                     "application/json"
                 ],
@@ -276,12 +459,15 @@ const docTemplate = `{
                 "tags": [
                     "dentist"
                 ],
-                "summary": "dentist example",
+                "summary": "Get all dentists",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/web.response"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dentist.Dentist"
+                            }
                         }
                     },
                     "500": {
@@ -293,7 +479,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Create a new dentist",
+                "description": "Create a new dentist with JSON input",
                 "consumes": [
                     "application/json"
                 ],
@@ -303,16 +489,39 @@ const docTemplate = `{
                 "tags": [
                     "dentist"
                 ],
-                "summary": "dentist example",
-                "responses": {
-                    "200": {
-                        "description": "OK",
+                "summary": "Create a new dentist",
+                "parameters": [
+                    {
+                        "description": "Dentist data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
                         "schema": {
-                            "$ref": "#/definitions/web.response"
+                            "$ref": "#/definitions/dentist.NewDentist"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dentist.Dentist"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
                         "schema": {
                             "$ref": "#/definitions/web.errorResponse"
                         }
@@ -326,9 +535,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/dentist/:id": {
+        "/dentist/{id}": {
             "get": {
-                "description": "Get dentist by id",
+                "description": "Get a dentist by its unique ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -338,11 +547,11 @@ const docTemplate = `{
                 "tags": [
                     "dentist"
                 ],
-                "summary": "dentist example",
+                "summary": "Get a dentist by ID",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "dentist id",
+                        "description": "Dentist ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -352,11 +561,17 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/web.response"
+                            "$ref": "#/definitions/dentist.Dentist"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/web.errorResponse"
                         }
@@ -370,7 +585,7 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "Update dentist by id",
+                "description": "Update a dentist with JSON input by its unique ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -380,16 +595,52 @@ const docTemplate = `{
                 "tags": [
                     "dentist"
                 ],
-                "summary": "dentist example",
+                "summary": "Update a dentist by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Dentist ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated dentist data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dentist.UpdateDentist"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/web.response"
+                            "$ref": "#/definitions/dentist.Dentist"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
                         "schema": {
                             "$ref": "#/definitions/web.errorResponse"
                         }
@@ -403,7 +654,7 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "Delete dentist by id",
+                "description": "Delete a dentist by its unique ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -413,25 +664,34 @@ const docTemplate = `{
                 "tags": [
                     "dentist"
                 ],
-                "summary": "dentist example",
+                "summary": "Delete a dentist by ID",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "dentist id",
+                        "description": "Dentist ID",
                         "name": "id",
                         "in": "path",
                         "required": true
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/web.response"
-                        }
+                    "204": {
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
                         "schema": {
                             "$ref": "#/definitions/web.errorResponse"
                         }
@@ -445,7 +705,7 @@ const docTemplate = `{
                 }
             },
             "patch": {
-                "description": "Patch dentist by id",
+                "description": "Partially update a dentist with JSON input by its unique ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -455,16 +715,52 @@ const docTemplate = `{
                 "tags": [
                     "dentist"
                 ],
-                "summary": "dentist example",
+                "summary": "Partially update a dentist by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Dentist ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Partial update data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dentist.PatchDentist"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/web.response"
+                            "$ref": "#/definitions/dentist.Dentist"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
                         "schema": {
                             "$ref": "#/definitions/web.errorResponse"
                         }
@@ -480,7 +776,7 @@ const docTemplate = `{
         },
         "/patient": {
             "get": {
-                "description": "Get all patients",
+                "description": "Get a list of all patients",
                 "consumes": [
                     "application/json"
                 ],
@@ -490,12 +786,15 @@ const docTemplate = `{
                 "tags": [
                     "patient"
                 ],
-                "summary": "patient example",
+                "summary": "Get all patients",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/web.response"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/patient.Patient"
+                            }
                         }
                     },
                     "500": {
@@ -507,7 +806,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Create a new patient",
+                "description": "Create a new patient with JSON input",
                 "consumes": [
                     "application/json"
                 ],
@@ -517,16 +816,39 @@ const docTemplate = `{
                 "tags": [
                     "patient"
                 ],
-                "summary": "patient example",
-                "responses": {
-                    "200": {
-                        "description": "OK",
+                "summary": "Create a new patient",
+                "parameters": [
+                    {
+                        "description": "Patient data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
                         "schema": {
-                            "$ref": "#/definitions/web.response"
+                            "$ref": "#/definitions/patient.NewPatient"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/patient.Patient"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
                         "schema": {
                             "$ref": "#/definitions/web.errorResponse"
                         }
@@ -540,9 +862,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/patient/:id": {
+        "/patient/{id}": {
             "get": {
-                "description": "Get patient by id",
+                "description": "Get a patient by its unique ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -552,11 +874,11 @@ const docTemplate = `{
                 "tags": [
                     "patient"
                 ],
-                "summary": "patient example",
+                "summary": "Get a patient by ID",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "patient id",
+                        "description": "Patient ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -566,11 +888,17 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/web.response"
+                            "$ref": "#/definitions/patient.Patient"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/web.errorResponse"
                         }
@@ -584,7 +912,7 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "Update patient by id",
+                "description": "Update a patient with JSON input by its unique ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -594,16 +922,52 @@ const docTemplate = `{
                 "tags": [
                     "patient"
                 ],
-                "summary": "patient example",
+                "summary": "Update a patient by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Patient ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated patient data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/patient.NewPatient"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/web.response"
+                            "$ref": "#/definitions/patient.Patient"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
                         "schema": {
                             "$ref": "#/definitions/web.errorResponse"
                         }
@@ -617,7 +981,7 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "Delete patient by id",
+                "description": "Delete a patient by its unique ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -627,25 +991,34 @@ const docTemplate = `{
                 "tags": [
                     "patient"
                 ],
-                "summary": "patient example",
+                "summary": "Delete a patient by ID",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "patient id",
+                        "description": "Patient ID",
                         "name": "id",
                         "in": "path",
                         "required": true
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/web.response"
-                        }
+                    "204": {
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
                         "schema": {
                             "$ref": "#/definitions/web.errorResponse"
                         }
@@ -659,7 +1032,7 @@ const docTemplate = `{
                 }
             },
             "patch": {
-                "description": "Patch patient by id",
+                "description": "Partially update a patient with JSON input by its unique ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -669,16 +1042,52 @@ const docTemplate = `{
                 "tags": [
                     "patient"
                 ],
-                "summary": "patient example",
+                "summary": "Partially update a patient by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Patient ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Partial update data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/patient.PatchPatient"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/web.response"
+                            "$ref": "#/definitions/patient.Patient"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
                         "schema": {
                             "$ref": "#/definitions/web.errorResponse"
                         }
@@ -694,6 +1103,257 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "appointment.Appointment": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string"
+                },
+                "dentist_id": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "patient_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "appointment.NewAppointment": {
+            "type": "object",
+            "required": [
+                "date",
+                "dentist_id",
+                "description",
+                "patient_id"
+            ],
+            "properties": {
+                "date": {
+                    "type": "string"
+                },
+                "dentist_id": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "patient_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "appointment.NewAppointmentDNIRegistrationNumber": {
+            "type": "object",
+            "required": [
+                "date",
+                "dentist_number",
+                "description",
+                "patient_dni"
+            ],
+            "properties": {
+                "date": {
+                    "type": "string"
+                },
+                "dentist_number": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "patient_dni": {
+                    "type": "integer",
+                    "maximum": 999999999,
+                    "minimum": 100000
+                }
+            }
+        },
+        "appointment.PatchAppointment": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string"
+                },
+                "dentist_id": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "patient_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "appointment.UpdateAppointment": {
+            "type": "object",
+            "required": [
+                "date",
+                "dentist_id",
+                "description",
+                "patient_id"
+            ],
+            "properties": {
+                "date": {
+                    "type": "string"
+                },
+                "dentist_id": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "patient_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dentist.Dentist": {
+            "type": "object",
+            "properties": {
+                "first_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "registration_number": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dentist.NewDentist": {
+            "type": "object",
+            "required": [
+                "first_name",
+                "last_name",
+                "registration_number"
+            ],
+            "properties": {
+                "first_name": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "registration_number": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dentist.PatchDentist": {
+            "type": "object",
+            "properties": {
+                "first_name": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "registration_number": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dentist.UpdateDentist": {
+            "type": "object",
+            "required": [
+                "first_name",
+                "last_name",
+                "registration_number"
+            ],
+            "properties": {
+                "first_name": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "registration_number": {
+                    "type": "integer"
+                }
+            }
+        },
+        "patient.NewPatient": {
+            "type": "object",
+            "required": [
+                "address",
+                "discharge_date",
+                "dni",
+                "first_name",
+                "last_name"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "discharge_date": {
+                    "type": "string"
+                },
+                "dni": {
+                    "type": "integer",
+                    "maximum": 99999999,
+                    "minimum": 100000
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "patient.PatchPatient": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "discharge_date": {
+                    "type": "string"
+                },
+                "dni": {
+                    "type": "integer",
+                    "maximum": 99999999,
+                    "minimum": 100000
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "patient.Patient": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "discharge_date": {
+                    "type": "string"
+                },
+                "dni": {
+                    "type": "integer"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "last_name": {
+                    "type": "string"
+                }
+            }
+        },
         "web.errorResponse": {
             "type": "object",
             "properties": {
@@ -703,12 +1363,6 @@ const docTemplate = `{
                 "message": {
                     "type": "string"
                 }
-            }
-        },
-        "web.response": {
-            "type": "object",
-            "properties": {
-                "data": {}
             }
         }
     }

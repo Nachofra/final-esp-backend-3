@@ -5,7 +5,6 @@ import (
 	"github.com/Nachofra/final-esp-backend-3/internal/domain/appointment"
 	"github.com/Nachofra/final-esp-backend-3/internal/domain/dentist"
 	"github.com/Nachofra/final-esp-backend-3/internal/domain/patient"
-	"github.com/Nachofra/final-esp-backend-3/pkg/custom_time"
 	"github.com/Nachofra/final-esp-backend-3/pkg/en_validator"
 	"github.com/Nachofra/final-esp-backend-3/pkg/web"
 	"github.com/gin-gonic/gin"
@@ -38,15 +37,17 @@ func NewHandler(service appointment.Service, patientService patient.Service, den
 	}
 }
 
-// Create is the handler in charge of the appointment creation flow.
-// Appointment godoc
-// @Summary appointment example
-// @Description Create a new appointment
+// Create is the handler responsible for creating a new appointment.
+// @Summary Create a new appointment
+// @Description Create a new appointment with JSON input
 // @Tags appointment
 // @Accept json
 // @Produce json
-// @Success 200 {object} web.response
+// @Param request body appointment.NewAppointment true "Appointment data"
+// @Success 201 {object} appointment.Appointment
 // @Failure 400 {object} web.errorResponse
+// @Failure 409 {object} web.errorResponse
+// @Failure 422 {object} web.errorResponse
 // @Failure 500 {object} web.errorResponse
 // @Router /appointment [post]
 func (h *Handler) Create() gin.HandlerFunc {
@@ -92,14 +93,16 @@ func (h *Handler) Create() gin.HandlerFunc {
 	}
 }
 
-// GetAll is the handler in charge of appointment querying flow.
-// Appointment godoc
-// @Summary appointment example
-// @Description Get all appointments
+// GetAll is the handler responsible for retrieving all appointments.
+// @Summary Get all appointments
+// @Description Get a list of all appointments with optional query parameters
 // @Tags appointment
 // @Accept json
 // @Produce json
-// @Success 200 {object} web.response
+// @Param filters query appointment.FilterAppointment false "Optional filters" default({}) Example({"dni":"12345678", "from_date":""2023-09-15 11:30:00""})
+// @Success 200 {array} appointment.Appointment
+// @Failure 400 {object} web.errorResponse
+// @Failure 422 {object} web.errorResponse
 // @Failure 500 {object} web.errorResponse
 // @Router /appointment [get]
 func (h *Handler) GetAll() gin.HandlerFunc {
@@ -135,18 +138,18 @@ func (h *Handler) GetAll() gin.HandlerFunc {
 	}
 }
 
-// GetByID is the handler in charge of querying appointments by ID.
-// Appointment godoc
-// @Summary appointment example
-// @Description Get appointment by id
+// GetByID is the handler responsible for retrieving an appointment by its ID.
+// @Summary Get an appointment by ID
+// @Description Get an appointment by its unique ID
 // @Tags appointment
-// @Param id path int true "appointment id"
+// @Param id path int true "Appointment ID"
 // @Accept json
 // @Produce json
-// @Success 200 {object} web.response
+// @Success 200 {object} appointment.Appointment
 // @Failure 400 {object} web.errorResponse
+// @Failure 404 {object} web.errorResponse
 // @Failure 500 {object} web.errorResponse
-// @Router /appointment/:id [get]
+// @Router /appointment/{id} [get]
 func (h *Handler) GetByID() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id, err := strconv.Atoi(ctx.Param("id"))
@@ -171,17 +174,21 @@ func (h *Handler) GetByID() gin.HandlerFunc {
 	}
 }
 
-// Update is the handler in charge of appointment updating flow.
-// Appointment godoc
-// @Summary appointment example
-// @Description Update appointment by id
+// Update is the handler responsible for updating an appointment by its ID.
+// @Summary Update an appointment by ID
+// @Description Update an appointment with JSON input by its unique ID
 // @Tags appointment
 // @Accept json
 // @Produce json
-// @Success 200 {object} web.response
+// @Param id path int true "Appointment ID"
+// @Param request body appointment.UpdateAppointment true "Updated appointment data"
+// @Success 200 {object} appointment.Appointment
 // @Failure 400 {object} web.errorResponse
+// @Failure 404 {object} web.errorResponse
+// @Failure 409 {object} web.errorResponse
+// @Failure 422 {object} web.errorResponse
 // @Failure 500 {object} web.errorResponse
-// @Router /appointment/:id [put]
+// @Router /appointment/{id} [put]
 func (h *Handler) Update() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 
@@ -245,17 +252,21 @@ func (h *Handler) Update() gin.HandlerFunc {
 	}
 }
 
-// Patch is the handler in charge of appointment updating flow.
-// Appointment godoc
-// @Summary appointment example
-// @Description Patch appointment by id
+// Patch is the handler responsible for partially updating an appointment by its ID.
+// @Summary Partially update an appointment by ID
+// @Description Partially update an appointment with JSON input by its unique ID
 // @Tags appointment
 // @Accept json
 // @Produce json
-// @Success 200 {object} web.response
+// @Param id path int true "Appointment ID"
+// @Param request body appointment.PatchAppointment true "Partial update data"
+// @Success 200 {object} appointment.Appointment
 // @Failure 400 {object} web.errorResponse
+// @Failure 404 {object} web.errorResponse
+// @Failure 409 {object} web.errorResponse
+// @Failure 422 {object} web.errorResponse
 // @Failure 500 {object} web.errorResponse
-// @Router /appointment/:id [patch]
+// @Router /appointment/{id} [patch]
 func (h *Handler) Patch() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 
@@ -308,18 +319,19 @@ func (h *Handler) Patch() gin.HandlerFunc {
 	}
 }
 
-// Delete is the handler in charge of appointment deleting flow.
-// Appointment godoc
-// @Summary appointment example
-// @Description Delete appointment by id
+// Delete is the handler responsible for deleting an appointment by its ID.
+// @Summary Delete an appointment by ID
+// @Description Delete an appointment by its unique ID
 // @Tags appointment
-// @Param id path int true "appointment id"
+// @Param id path int true "Appointment ID"
 // @Accept json
 // @Produce json
-// @Success 200 {object} web.response
+// @Success 204
 // @Failure 400 {object} web.errorResponse
+// @Failure 404 {object} web.errorResponse
+// @Failure 409 {object} web.errorResponse
 // @Failure 500 {object} web.errorResponse
-// @Router /appointment/:id [delete]
+// @Router /appointment/{id} [delete]
 func (h *Handler) Delete() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id, err := strconv.Atoi(ctx.Param("id"))
@@ -346,28 +358,24 @@ func (h *Handler) Delete() gin.HandlerFunc {
 	}
 }
 
-// CreateByDNI is the handler in charge of creating appointments by DNI and RegistrationNumber.
-// Appointment by DNI godoc
-// @Summary appointment example
-// @Description Create a new appointment
+// CreateByDNI is the handler responsible for creating appointments by patient DNI and dentist registration number.
+// @Summary Create an appointment by patient DNI and dentist registration number
+// @Description Create a new appointment with JSON input using patient DNI and dentist registration number
 // @Tags appointment
 // @Accept json
 // @Produce json
-// @Success 200 {object} web.response
+// @Param request body appointment.NewAppointmentDNIRegistrationNumber true "Appointment data"
+// @Success 201 {object} appointment.Appointment
 // @Failure 400 {object} web.errorResponse
+// @Failure 404 {object} web.errorResponse
+// @Failure 409 {object} web.errorResponse
+// @Failure 422 {object} web.errorResponse
 // @Failure 500 {object} web.errorResponse
 // @Router /appointment/dni [post]
 func (h *Handler) CreateByDNI() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 
-		type NewCreate struct {
-			PatientDNI    int              `json:"patient_dni" validate:"min=10000000,max=999999999"`
-			DentistNumber int              `json:"dentist_number"`
-			Date          custom_time.Time `json:"date"`
-			Description   string           `json:"description"`
-		}
-
-		var request NewCreate
+		var request appointment.NewAppointmentDNIRegistrationNumber
 		var app appointment.NewAppointment
 		var pa patient.Patient
 		var de dentist.Dentist
@@ -391,13 +399,25 @@ func (h *Handler) CreateByDNI() gin.HandlerFunc {
 
 		pa, err = h.patientService.GetByDNI(ctx, request.PatientDNI)
 		if err != nil {
-			web.Error(ctx, http.StatusUnprocessableEntity, "%s", err)
-			return
+			switch {
+			case errors.Is(err, patient.ErrNotFound):
+				web.Error(ctx, http.StatusNotFound, "%s", err)
+				return
+			default:
+				web.Error(ctx, http.StatusInternalServerError, "%s", ErrInternalServer)
+				return
+			}
 		}
 		de, err = h.dentistService.GetByRegistrationNumber(ctx, request.DentistNumber)
 		if err != nil {
-			web.Error(ctx, http.StatusUnprocessableEntity, "%s", err)
-			return
+			switch {
+			case errors.Is(err, dentist.ErrNotFound):
+				web.Error(ctx, http.StatusNotFound, "%s", err)
+				return
+			default:
+				web.Error(ctx, http.StatusInternalServerError, "%s", ErrInternalServer)
+				return
+			}
 		}
 
 		app.PatientID = pa.ID

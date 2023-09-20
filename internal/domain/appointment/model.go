@@ -23,6 +23,14 @@ type NewAppointment struct {
 	Description string           `json:"description" validate:"required"`
 }
 
+// NewAppointmentDNIRegistrationNumber describes the request body for creating an appointment by DNI and dentist registration number.
+type NewAppointmentDNIRegistrationNumber struct {
+	PatientDNI    int              `json:"patient_dni"    validate:"required,min=100000,max=999999999"`
+	DentistNumber int              `json:"dentist_number" validate:"required"`
+	Date          custom_time.Time `json:"date"           validate:"required"`
+	Description   string           `json:"description"    validate:"required"`
+}
+
 // UpdateAppointment describes the data needed to update an Appointment.
 type UpdateAppointment struct {
 	PatientID   int              `json:"patient_id"  validate:"required"`

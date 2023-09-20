@@ -31,15 +31,17 @@ func NewHandler(service dentist.Service, validator *en_validator.Validator) *Han
 	}
 }
 
-// Create is the handler in charge of the dentist creation flow.
-// Dentist godoc
-// @Summary dentist example
-// @Description Create a new dentist
+// Create is the handler responsible for creating a new dentist.
+// @Summary Create a new dentist
+// @Description Create a new dentist with JSON input
 // @Tags dentist
 // @Accept json
 // @Produce json
-// @Success 200 {object} web.response
+// @Param request body dentist.NewDentist true "Dentist data"
+// @Success 201 {object} dentist.Dentist
 // @Failure 400 {object} web.errorResponse
+// @Failure 409 {object} web.errorResponse
+// @Failure 422 {object} web.errorResponse
 // @Failure 500 {object} web.errorResponse
 // @Router /dentist [post]
 func (h *Handler) Create() gin.HandlerFunc {
@@ -86,14 +88,13 @@ func (h *Handler) Create() gin.HandlerFunc {
 	}
 }
 
-// GetAll is the handler in charge of dentist querying flow.
-// Dentist godoc
-// @Summary dentist example
-// @Description Get all dentists
+// GetAll is the handler responsible for retrieving all dentists.
+// @Summary Get all dentists
+// @Description Get a list of all dentists
 // @Tags dentist
 // @Accept json
 // @Produce json
-// @Success 200 {object} web.response
+// @Success 200 {array} dentist.Dentist
 // @Failure 500 {object} web.errorResponse
 // @Router /dentist [get]
 func (h *Handler) GetAll() gin.HandlerFunc {
@@ -104,18 +105,18 @@ func (h *Handler) GetAll() gin.HandlerFunc {
 	}
 }
 
-// GetByID is the handler in charge of querying dentists by ID.
-// Dentist godoc
-// @Summary dentist example
-// @Description Get dentist by id
+// GetByID is the handler responsible for retrieving a dentist by its ID.
+// @Summary Get a dentist by ID
+// @Description Get a dentist by its unique ID
 // @Tags dentist
-// @Param id path int true "dentist id"
+// @Param id path int true "Dentist ID"
 // @Accept json
 // @Produce json
-// @Success 200 {object} web.response
+// @Success 200 {object} dentist.Dentist
 // @Failure 400 {object} web.errorResponse
+// @Failure 404 {object} web.errorResponse
 // @Failure 500 {object} web.errorResponse
-// @Router /dentist/:id [get]
+// @Router /dentist/{id} [get]
 func (h *Handler) GetByID() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id, err := strconv.Atoi(ctx.Param("id"))
@@ -140,17 +141,21 @@ func (h *Handler) GetByID() gin.HandlerFunc {
 	}
 }
 
-// Update is the handler in charge of dentist updating flow.
-// Dentist godoc
-// @Summary dentist example
-// @Description Update dentist by id
+// Update is the handler responsible for updating a dentist by its ID.
+// @Summary Update a dentist by ID
+// @Description Update a dentist with JSON input by its unique ID
 // @Tags dentist
 // @Accept json
 // @Produce json
-// @Success 200 {object} web.response
+// @Param id path int true "Dentist ID"
+// @Param request body dentist.UpdateDentist true "Updated dentist data"
+// @Success 200 {object} dentist.Dentist
 // @Failure 400 {object} web.errorResponse
+// @Failure 404 {object} web.errorResponse
+// @Failure 409 {object} web.errorResponse
+// @Failure 422 {object} web.errorResponse
 // @Failure 500 {object} web.errorResponse
-// @Router /dentist/:id [put]
+// @Router /dentist/{id} [put]
 func (h *Handler) Update() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 
@@ -215,18 +220,19 @@ func (h *Handler) Update() gin.HandlerFunc {
 	}
 }
 
-// Delete is the handler in charge of dentist deleting flow.
-// Dentist godoc
-// @Summary dentist example
-// @Description Delete dentist by id
+// Delete is the handler responsible for deleting a dentist by its ID.
+// @Summary Delete a dentist by ID
+// @Description Delete a dentist by its unique ID
 // @Tags dentist
-// @Param id path int true "dentist id"
+// @Param id path int true "Dentist ID"
 // @Accept json
 // @Produce json
-// @Success 200 {object} web.response
+// @Success 204
 // @Failure 400 {object} web.errorResponse
+// @Failure 404 {object} web.errorResponse
+// @Failure 409 {object} web.errorResponse
 // @Failure 500 {object} web.errorResponse
-// @Router /dentist/:id [delete]
+// @Router /dentist/{id} [delete]
 func (h *Handler) Delete() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id, err := strconv.Atoi(ctx.Param("id"))
@@ -254,17 +260,21 @@ func (h *Handler) Delete() gin.HandlerFunc {
 	}
 }
 
-// Patch is the handler in charge of appointment patching flow.
-// Dentist godoc
-// @Summary dentist example
-// @Description Patch dentist by id
+// Patch is the handler responsible for partially updating a dentist by its ID.
+// @Summary Partially update a dentist by ID
+// @Description Partially update a dentist with JSON input by its unique ID
 // @Tags dentist
 // @Accept json
 // @Produce json
-// @Success 200 {object} web.response
+// @Param id path int true "Dentist ID"
+// @Param request body dentist.PatchDentist true "Partial update data"
+// @Success 200 {object} dentist.Dentist
 // @Failure 400 {object} web.errorResponse
+// @Failure 404 {object} web.errorResponse
+// @Failure 409 {object} web.errorResponse
+// @Failure 422 {object} web.errorResponse
 // @Failure 500 {object} web.errorResponse
-// @Router /dentist/:id [patch]
+// @Router /dentist/{id} [patch]
 func (h *Handler) Patch() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 
