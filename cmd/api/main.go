@@ -36,7 +36,6 @@ func main() {
 
 	eng := gin.New()
 	eng.Use(middleware.Logger())
-	//eng.Use(middleware.Authenticate())
 
 	logger := log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime)
 	validator := en_validator.Get()
