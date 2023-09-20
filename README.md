@@ -11,6 +11,7 @@ Make sure you have the following prerequisites installed before running the appl
 
 - [Docker](https://docs.docker.com/get-docker/)
 - [Docker Compose](https://docs.docker.com/compose/install/)
+- [Important - Read Before Starting Application with Make](#important)
 
 ## Build the Application Image
 
@@ -36,7 +37,7 @@ docker-compose.yml file:
 # These are all the configurable variables; you have the option to configure all of them or none at all.
 
 # MySQL database configuration 
-DATABASE_HOST=0.0.0.0
+DATABASE_HOST=localhost # or host.docker.internal (1st is for local, 2nd is while running with make option)
 DATABASE_PORT=3307
 DATABASE_USER=root
 DATABASE_PASSWORD=root
@@ -48,11 +49,24 @@ DATABASE_PARSE_TIME=true
 GIN_MODE=debug
 
 # Custom host and port for your application
-HOST=localhost               # Change this to your desired host
-PORT=8080                     # Change this to your desired port
+HOST=locahost # or 0.0.0.0 (1st is for local, 2nd is while running with make option)
+PORT=8080
 ```
 
 ### Important:
+Firstly, if you decide to proceed with the 'make' option to launch the app, it should function correctly 
+as long as there is no conflicting service utilizing port 3307 for the database.
+
+I'm not entirely sure why Docker Compose only works as expected when the application's HOST is set to '0.0.0.0' 
+and the DATABASE_HOST is set to 'host.docker.internal'
+
+If you have the application in Docker, and you're using Postman, please consider using '0.0.0.0' or '127.0.0.1' instead of 'localhost' in the requests.
+Unfortunately, due to time constraints, I'm unable to thoroughly investigate this issue before the deadline. 
+
+While you cannot directly override the hardcoded variables in the Docker Compose file with an environment file 
+(unless you're feeling adventurous), I recommend first attempting to start the app using the 'make' command. 
+If that doesn't work, you can try running the Golang application locally, where 'localhost' should function as expected.
+
 If you intend to create an .env file and modify the DATABASE_PORT variable, please remember to update the
 database port in the docker-compose file as well. This step is crucial because if you only modify the .env file,
 the database container will still use the hardcoded port 3307.

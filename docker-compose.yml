@@ -16,6 +16,9 @@ services:
   app:
     image: final-esp-backend-3-grupo-1
     container_name: final-esp-backend-3-grupo-1-app
+    environment:
+      HOST:          0.0.0.0
+      DATABASE_HOST: host.docker.internal
     env_file:
       - .env
     ports:
