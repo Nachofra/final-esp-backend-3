@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-// Validator is a struc for validations
+// Validator is a struct for validations with translations.
 type Validator struct {
 	Validate   *validator.Validate
 	Translator ut.Translator
@@ -17,7 +17,7 @@ type Validator struct {
 
 // Get sets the validator used in the whole application (this is a bit hardcoded, but I don't have time)
 // A lot of this could be parametrized in the future, like language, validator params in New() func and settings
-// default translations accordingly
+// default translations accordingly.
 func Get() *Validator {
 
 	// Initializing translation to english, this
@@ -43,6 +43,7 @@ func Get() *Validator {
 	}
 }
 
+// Translate parses validationsErrors map to an easy reading string.
 func (v *Validator) Translate(errs validator.ValidationErrors) string {
 	output := errs.Translate(v.Translator)
 

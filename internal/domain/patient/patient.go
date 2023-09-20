@@ -12,6 +12,7 @@ var (
 	ErrValueExceeded = errors.New("attribute value exceed type limit")
 )
 
+// Store specifies the contract needed for the Store in the Service.
 type Store interface {
 	Create(ctx context.Context, patient Patient) (Patient, error)
 	GetAll(ctx context.Context) []Patient
@@ -21,6 +22,7 @@ type Store interface {
 	Delete(ctx context.Context, id int) error
 }
 
+// service unifies all the business operation for the domain.
 type service struct {
 	store Store
 }
