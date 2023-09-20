@@ -118,7 +118,7 @@ paths:
     patch:
       consumes:
       - application/json
-      description: PatchUpdate appointment by id
+      description: Patch appointment by id
       produces:
       - application/json
       responses:
@@ -198,7 +198,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/web.errorResponse'
-      summary: denist example
+      summary: dentist example
       tags:
       - dentist
     post:
@@ -283,7 +283,7 @@ paths:
     patch:
       consumes:
       - application/json
-      description: Update dentist by id
+      description: Patch dentist by id
       produces:
       - application/json
       responses:
@@ -425,7 +425,7 @@ paths:
     patch:
       consumes:
       - application/json
-      description: Update patient by id
+      description: Patch patient by id
       produces:
       - application/json
       responses:

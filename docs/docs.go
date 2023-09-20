@@ -196,7 +196,7 @@ const docTemplate = `{
                 }
             },
             "patch": {
-                "description": "PatchUpdate appointment by id",
+                "description": "Patch appointment by id",
                 "consumes": [
                     "application/json"
                 ],
@@ -276,7 +276,7 @@ const docTemplate = `{
                 "tags": [
                     "dentist"
                 ],
-                "summary": "denist example",
+                "summary": "dentist example",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -445,7 +445,7 @@ const docTemplate = `{
                 }
             },
             "patch": {
-                "description": "Update dentist by id",
+                "description": "Patch dentist by id",
                 "consumes": [
                     "application/json"
                 ],
@@ -659,7 +659,7 @@ const docTemplate = `{
                 }
             },
             "patch": {
-                "description": "Update patient by id",
+                "description": "Patch patient by id",
                 "consumes": [
                     "application/json"
                 ],

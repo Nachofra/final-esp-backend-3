@@ -189,7 +189,7 @@
                 }
             },
             "patch": {
-                "description": "PatchUpdate appointment by id",
+                "description": "Patch appointment by id",
                 "consumes": [
                     "application/json"
                 ],
@@ -269,7 +269,7 @@
                 "tags": [
                     "dentist"
                 ],
-                "summary": "denist example",
+                "summary": "dentist example",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -438,7 +438,7 @@
                 }
             },
             "patch": {
-                "description": "Update dentist by id",
+                "description": "Patch dentist by id",
                 "consumes": [
                     "application/json"
                 ],
@@ -652,7 +652,7 @@
                 }
             },
             "patch": {
-                "description": "Update patient by id",
+                "description": "Patch patient by id",
                 "consumes": [
                     "application/json"
                 ],
