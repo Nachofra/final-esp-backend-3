@@ -90,3 +90,16 @@ The application will be available at `http://localhost:8080`.
 
 To stop the application and Docker containers, simply press `Ctrl + C` in the terminal where the `make start` 
 command is running.
+
+
+## Things to improve (never)
+
+Implementation of the validator: I feel that using it every time in each handler is a bit awkward. I would consider a way to generalize its functionality. Also, its configuration and initialization (currently, everything is hard-coded).
+
+Deactivate dentists or patients and logically cancel their appointments. Currently, this causes conflicts, and you have to delete the appointments.
+
+More validations (there's always room for more validation).
+
+Improve the check for existence. In the updates, I have to retrieve the row by ID to check it. It's not very performant, but perhaps there are better or more generalized ways to do it. Doing it manually in the handler is not my preference, I think.
+
+Thats all :)))
